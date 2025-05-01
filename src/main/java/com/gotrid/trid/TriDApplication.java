@@ -20,7 +20,7 @@ public class TriDApplication {
         SpringApplication.run(TriDApplication.class, args);
     }
 
-    @Bean
+//    @Bean
     public CommandLineRunner runner(
             RoleRepository roleRepository
     ) {

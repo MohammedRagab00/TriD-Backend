@@ -1,0 +1,6 @@
+ALTER TABLE token
+ALTER
+COLUMN token TYPE varchar(40);
+
+ALTER TABLE token
+    ADD COLUMN type SMALLINT NOT NULL;

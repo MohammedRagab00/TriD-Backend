@@ -1,4 +1,4 @@
-package com.gotrid.trid.user;
+package com.gotrid.trid.user.token;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

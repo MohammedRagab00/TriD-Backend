@@ -1,5 +1,6 @@
-package com.gotrid.trid.user;
+package com.gotrid.trid.user.token;
 
+import com.gotrid.trid.user.Users;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
@@ -24,8 +25,12 @@ public class Token {
             allocationSize = 4
     )
     private Integer id;
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 40)
     private String token;
+
+    @Enumerated
+    @Column(nullable = false)
+    private TokenType type;
 
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;

@@ -35,20 +35,19 @@ public class EmailService {
      *
      * @param to              Email recipient address
      * @param username        Username to display in the email
-     * @param emailTemplate   Template to use, or null for default
-     * @param confirmationUrl URL for the activation link
+     * @param template        Template to use, or null for default
+     * @param frontendUrl URL for the activation link
      * @param activationCode  Activation code for manual entry
      */
     @Async
     public void sendEmail(
             String to,
             String username,
-            EmailTemplateName emailTemplate,
-            String confirmationUrl,
+            EmailTemplateName template,
+            String frontendUrl,
             String activationCode
     ) throws MessagingException {
         try {
-            EmailTemplateName template = emailTemplate != null ? emailTemplate : EmailTemplateName.ACTIVATE_ACCOUNT;
 
             String subject = template.getDefaultSubject();
 
@@ -61,7 +60,7 @@ public class EmailService {
 
             Map<String, Object> properties = new HashMap<>();
             properties.put("username", username);
-            properties.put("confirmation_url", confirmationUrl);
+            properties.put("frontend_url", frontendUrl);
             properties.put("activation_code", activationCode);
 
             Context context = new Context();

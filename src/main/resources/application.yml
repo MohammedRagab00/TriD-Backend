@@ -45,7 +45,7 @@ application:
         expiration-days: ${EXPIRATION_DAYS}
   mailing:
     frontend:
-      activation-url: http://localhost:4200/activate-account
+      url: http://localhost:4200
 springdoc:
   default-produces-media-type: application/json
 server:

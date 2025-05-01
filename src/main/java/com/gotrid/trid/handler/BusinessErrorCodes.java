@@ -18,7 +18,7 @@ public enum BusinessErrorCodes {
     EMAIL_ALREADY_EXISTS(305, CONFLICT, "Email already registered"),
     TOKEN_EXPIRED(310, UNAUTHORIZED, "Token Expired"),
     AUTHORIZATION_DENIED(403, FORBIDDEN, "Access Denied"),
-    INVALID_ACTIVATION_TOKEN(1008, BAD_REQUEST, "Invalid activation token"),
+    INVALID_TOKEN(1008, BAD_REQUEST, "Invalid token"),
     ;
 
     private final int code;

@@ -6,32 +6,39 @@ import com.gotrid.trid.auth.dto.AuthenticationRequest;
 import com.gotrid.trid.auth.dto.AuthenticationResponse;
 import com.gotrid.trid.auth.dto.RegistrationRequest;
 import com.gotrid.trid.email.EmailService;
-import com.gotrid.trid.email.EmailTemplateName;
 import com.gotrid.trid.exception.EmailAlreadyExistsException;
-import com.gotrid.trid.exception.InvalidActivationTokenException;
 import com.gotrid.trid.exception.InvalidRefreshTokenException;
+import com.gotrid.trid.exception.InvalidTokenException;
 import com.gotrid.trid.exception.TokenExpiredException;
 import com.gotrid.trid.role.RoleRepository;
 import com.gotrid.trid.security.JwtService;
-import com.gotrid.trid.user.Token;
-import com.gotrid.trid.user.TokenRepository;
 import com.gotrid.trid.user.Users;
 import com.gotrid.trid.user.UsersRepository;
+import com.gotrid.trid.user.token.Token;
+import com.gotrid.trid.user.token.TokenRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.UUID;
+
+import static com.gotrid.trid.email.EmailTemplateName.ACTIVATE_ACCOUNT;
+import static com.gotrid.trid.email.EmailTemplateName.RESET_PASSWORD;
+import static com.gotrid.trid.user.token.TokenType.ACTIVATION;
+import static com.gotrid.trid.user.token.TokenType.PASSWORD_RESET;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Service
@@ -39,20 +46,20 @@ public class AuthenticationService {
 
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UsersRepository usersRepository;
+    private final UsersRepository userRepository;
     private final TokenRepository tokenRepository;
     private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final TransactionTemplate transactionTemplate;
     private final RefreshTokenService refreshTokenService;
-    @Value("${application.mailing.frontend.activation-url}")
-    private String activationUrl;
+    @Value("${application.mailing.frontend.url}")
+    private String Url;
 
     public void register(RegistrationRequest request) throws MessagingException {
         String normalizedEmail = request.email().toLowerCase();
 
-        if (usersRepository.findByEmail(normalizedEmail).isPresent()) {
+        if (userRepository.findByEmail(normalizedEmail).isPresent()) {
             throw new EmailAlreadyExistsException("Email already registered: " + normalizedEmail);
         }
 
@@ -70,7 +77,7 @@ public class AuthenticationService {
                 .enabled(false)
                 .roles(Set.of(userRole))
                 .build();
-        usersRepository.save(user);
+        userRepository.save(user);
         sendValidationEmail(user);
     }
 
@@ -80,8 +87,8 @@ public class AuthenticationService {
         emailService.sendEmail(
                 user.getEmail(),
                 user.getName(),
-                EmailTemplateName.ACTIVATE_ACCOUNT,
-                activationUrl,
+                ACTIVATE_ACCOUNT,
+                Url + "/activate-account?token=" + newToken,
                 newToken
         );
     }
@@ -90,6 +97,7 @@ public class AuthenticationService {
         String generatedToken = generateActivationCode(6);
         var token = Token.builder()
                 .token(generatedToken)
+                .type(ACTIVATION)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusMinutes(15))
                 .user(user)
@@ -161,24 +169,70 @@ public class AuthenticationService {
     }
 
 
-    //    @Transactional
     public void activateAccount(String token) throws MessagingException {
         Token savedToken = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new InvalidActivationTokenException("Invalid token"));
+                .orElseThrow(() -> new InvalidTokenException("Invalid token"));
         if (LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
             sendValidationEmail(savedToken.getUser());
             throw new TokenExpiredException("Token expired! A new activation email has been sent.");
         }
 
+        if (savedToken.getType() != ACTIVATION || savedToken.getValidatedAt() != null) {
+            throw new InvalidTokenException("Invalid or already used token");
+        }
+
         transactionTemplate.execute(_ -> {
-            var user = usersRepository.findById(savedToken.getUser().getId())
+            var user = userRepository.findById(savedToken.getUser().getId())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
             user.setEnabled(true);
-            usersRepository.save(user);
+            userRepository.save(user);
             savedToken.setValidatedAt(LocalDateTime.now());
             tokenRepository.save(savedToken);
             return null;
         });
+    }
 
+    public void forgotPassword(String email) throws MessagingException {
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadCredentialsException("User not found"));
+
+        String token = UUID.randomUUID().toString();
+        Token resetToken = Token.builder()
+                .token(token)
+                .type(PASSWORD_RESET)
+                .user(user)
+                .createdAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusMinutes(15))
+                .build();
+
+        tokenRepository.save(resetToken);
+
+        emailService.sendEmail(
+                user.getEmail(),
+                user.getUsername(),
+                RESET_PASSWORD,
+                Url + "/reset-password?token=" + token,
+                token
+        );
+    }
+
+    @Transactional
+    public void resetPassword(String tokenString, String newPassword) {
+        Token resetToken = tokenRepository.findByToken(tokenString)
+                .orElseThrow(() -> new InvalidTokenException("Invalid reset token"));
+
+        if (resetToken.getType() != PASSWORD_RESET ||
+                resetToken.getExpiresAt().isBefore(LocalDateTime.now()) ||
+                resetToken.getValidatedAt() != null
+        ) {
+            throw new InvalidTokenException("Invalid or expired reset token");
+        }
+
+        Users user = resetToken.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        resetToken.setValidatedAt(LocalDateTime.now());
+        tokenRepository.save(resetToken);
     }
 }

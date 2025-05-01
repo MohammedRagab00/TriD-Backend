@@ -4,6 +4,8 @@ import com.gotrid.trid.auth.dto.AuthenticationRequest;
 import com.gotrid.trid.auth.dto.AuthenticationResponse;
 import com.gotrid.trid.auth.dto.RefreshTokenRequest;
 import com.gotrid.trid.auth.dto.RegistrationRequest;
+import com.gotrid.trid.email.dto.ForgotPasswordRequest;
+import com.gotrid.trid.email.dto.ResetPasswordRequest;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -57,6 +59,24 @@ public class AuthenticatorController {
             RefreshTokenRequest request
     ) {
         return ResponseEntity.ok(service.refreshToken(request.refreshToken()));
+    }
+
+    @PostMapping("/forgot-password")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ResponseEntity<?> forgotPassword(
+            @RequestBody @Valid ForgotPasswordRequest request
+    ) throws MessagingException {
+        service.forgotPassword(request.email());
+        return ResponseEntity.accepted().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(
+            @RequestParam("token") String token,
+            @RequestBody @Valid ResetPasswordRequest request
+    ) {
+        service.resetPassword(token, request.password());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/logout")

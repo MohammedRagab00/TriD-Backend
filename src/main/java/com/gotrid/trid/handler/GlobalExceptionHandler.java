@@ -1,7 +1,7 @@
 package com.gotrid.trid.handler;
 
 import com.gotrid.trid.exception.EmailAlreadyExistsException;
-import com.gotrid.trid.exception.InvalidActivationTokenException;
+import com.gotrid.trid.exception.InvalidTokenException;
 import com.gotrid.trid.exception.InvalidRefreshTokenException;
 import com.gotrid.trid.exception.TokenExpiredException;
 import jakarta.mail.MessagingException;
@@ -67,16 +67,16 @@ public class GlobalExceptionHandler {
                 );
     }
 
-    @ExceptionHandler(InvalidActivationTokenException.class)
+    @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<ExceptionResponse> handleException(
-            InvalidActivationTokenException exp
+            InvalidTokenException exp
     ) {
         return ResponseEntity
-                .status(INVALID_ACTIVATION_TOKEN.getHttpStatus())
+                .status(INVALID_TOKEN.getHttpStatus())
                 .body(ExceptionResponse.builder()
-                        .code(INVALID_ACTIVATION_TOKEN.getCode())
-                        .message(exp.getMessage())
-                        .details(INVALID_ACTIVATION_TOKEN.getDescription())
+                        .code(INVALID_TOKEN.getCode())
+                        .message(INVALID_TOKEN.getDescription())
+                        .details(exp.getMessage())
                         .build()
                 );
     }
