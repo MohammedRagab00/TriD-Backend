@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: In-Test
+  jpa:
+#    hibernate:
+#      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        highlight_sql: true
