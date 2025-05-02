@@ -10,8 +10,8 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
-#  profiles:
-#    active: dev
+  profiles:
+    active: dev
   servlet:
     multipart:
       max-file-size: 300MB
