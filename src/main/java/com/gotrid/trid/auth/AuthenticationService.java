@@ -181,7 +181,7 @@ public class AuthenticationService {
             throw new InvalidTokenException("Invalid or already used token");
         }
 
-        transactionTemplate.execute(_ -> {
+        transactionTemplate.execute(ignored -> {
             var user = userRepository.findById(savedToken.getUser().getId())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
             user.setEnabled(true);
