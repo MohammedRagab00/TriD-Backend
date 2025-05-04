@@ -6,12 +6,11 @@ import com.gotrid.trid.auth.dto.AuthenticationRequest;
 import com.gotrid.trid.auth.dto.AuthenticationResponse;
 import com.gotrid.trid.auth.dto.RegistrationRequest;
 import com.gotrid.trid.email.EmailService;
-import com.gotrid.trid.exception.EmailAlreadyExistsException;
-import com.gotrid.trid.exception.InvalidRefreshTokenException;
-import com.gotrid.trid.exception.InvalidTokenException;
-import com.gotrid.trid.exception.TokenExpiredException;
+import com.gotrid.trid.exception.*;
+import com.gotrid.trid.role.Role;
 import com.gotrid.trid.role.RoleRepository;
 import com.gotrid.trid.security.JwtService;
+import com.gotrid.trid.user.Gender;
 import com.gotrid.trid.user.Users;
 import com.gotrid.trid.user.UsersRepository;
 import com.gotrid.trid.user.token.Token;
@@ -30,10 +29,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.gotrid.trid.email.EmailTemplateName.ACTIVATE_ACCOUNT;
 import static com.gotrid.trid.email.EmailTemplateName.RESET_PASSWORD;
@@ -59,14 +60,21 @@ public class AuthenticationService {
     public void register(RegistrationRequest request) throws MessagingException {
         String normalizedEmail = request.email().toLowerCase();
 
-        if (userRepository.findByEmail(normalizedEmail).isPresent()) {
+        if (userRepository.existsByEmail(normalizedEmail)) {
             throw new EmailAlreadyExistsException("Email already registered: " + normalizedEmail);
         }
 
+        validateAge(request.birthDate());
 
         var userRole = roleRepository.findByName("ROLE_USER")
                 //todo - better exception handling
                 .orElseThrow(() -> new IllegalStateException("Role USER was not initialized"));
+        Gender gender;
+        try {
+            gender = Gender.valueOf(request.gender().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidGenderException("Gender must be MALE, FEMALE, or PREFER_NOT_TO_SAY");
+        }
 
         var user = Users.builder()
                 .firstname(request.firstname())
@@ -76,9 +84,17 @@ public class AuthenticationService {
                 .accountLocked(false)
                 .enabled(false)
                 .roles(Set.of(userRole))
+                .gender(gender)
+                .dob(request.birthDate())
                 .build();
         userRepository.save(user);
         sendValidationEmail(user);
+    }
+
+    private void validateAge(LocalDate birthDate) {
+        if (birthDate.isAfter(LocalDate.now().minusYears(13))) {
+            throw new InvalidAgeException("You must be at least 13 years old to register.");
+        }
     }
 
     private void sendValidationEmail(Users user) throws MessagingException {
@@ -136,9 +152,16 @@ public class AuthenticationService {
         // Generate refresh token
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
+        Set<String> roles = user.getRoles().stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet());
+
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .refreshToken(refreshToken.getToken())
+                .roles(roles)
+                .email(user.getEmail())
+                .fullName(user.getName())
                 .build();
     }
 

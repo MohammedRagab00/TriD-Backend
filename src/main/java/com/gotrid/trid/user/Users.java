@@ -1,8 +1,10 @@
 package com.gotrid.trid.user;
 
 import com.gotrid.trid.common.BaseEntity;
+import com.gotrid.trid.exception.InvalidAgeException;
 import com.gotrid.trid.role.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Past;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,10 +34,14 @@ public class Users extends BaseEntity implements UserDetails, Principal {
     private String firstname;
     @Column(length = 50, nullable = false)
     private String lastname;
-    private LocalDate dateOfBirth;
     @Column(unique = true, length = 100, nullable = false, updatable = false)
     private String email;
     private String password;
+
+    @Column(name = "date_of_birth", nullable = false)
+    private LocalDate dob;
+    private String photo;
+    private Gender gender;
 
     private boolean accountLocked;
     private boolean enabled;
@@ -88,5 +95,14 @@ public class Users extends BaseEntity implements UserDetails, Principal {
     @Override
     public String getName() {
         return firstname + " " + lastname;
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void validateAge() {
+        if (dob != null &&
+                ChronoUnit.YEARS.between(dob, LocalDate.now()) < 13) {
+            throw new InvalidAgeException("User must be at least 13 years old");
+        }
     }
 }
