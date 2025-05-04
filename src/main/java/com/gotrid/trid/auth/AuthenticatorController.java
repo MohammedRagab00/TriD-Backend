@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
@@ -85,7 +84,6 @@ public class AuthenticatorController {
             summary = "Refresh authentication token",
             description = "Gets a new access token using a valid refresh token"
     )
-    @SecurityRequirement(name = "bearerAuth")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
