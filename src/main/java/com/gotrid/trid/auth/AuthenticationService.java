@@ -10,6 +10,7 @@ import com.gotrid.trid.exception.EmailAlreadyExistsException;
 import com.gotrid.trid.exception.InvalidRefreshTokenException;
 import com.gotrid.trid.exception.InvalidTokenException;
 import com.gotrid.trid.exception.TokenExpiredException;
+import com.gotrid.trid.role.Role;
 import com.gotrid.trid.role.RoleRepository;
 import com.gotrid.trid.security.JwtService;
 import com.gotrid.trid.user.Users;
@@ -34,6 +35,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.gotrid.trid.email.EmailTemplateName.ACTIVATE_ACCOUNT;
 import static com.gotrid.trid.email.EmailTemplateName.RESET_PASSWORD;
@@ -136,9 +138,16 @@ public class AuthenticationService {
         // Generate refresh token
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
+        Set<String> roles = user.getRoles().stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet());
+
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .refreshToken(refreshToken.getToken())
+                .roles(roles)
+                .email(user.getEmail())
+                .fullName(user.getName())
                 .build();
     }
 
