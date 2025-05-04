@@ -1,0 +1,88 @@
+package com.gotrid.trid.azure;
+
+
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.models.BlobHttpHeaders;
+import com.gotrid.trid.exception.FileValidationException;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Service
+@Slf4j
+public class AzureStorageService {
+    private final BlobServiceClient blobServiceClient;
+
+    @PostConstruct
+    public void initialize() {
+        if (blobServiceClient == null) {
+            throw new IllegalStateException("BlobServiceClient not configured");
+        }
+    }
+
+    public String uploadFile(MultipartFile file, String containerName, String filename,
+                             long maxSize, List<String> allowedTypes) {
+        validateFile(file, maxSize, allowedTypes);
+
+        try {
+            BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
+            BlobClient blobClient = containerClient.getBlobClient(filename);
+
+            BlobHttpHeaders headers = new BlobHttpHeaders()
+                    .setContentType(file.getContentType());
+
+            blobClient.upload(file.getInputStream(), file.getSize(), true);
+            blobClient.setHttpHeaders(headers);
+
+            return blobClient.getBlobUrl();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload file", e);
+        }
+    }
+
+    public void deleteFile(String fileUrl, String containerName) {
+        try {
+            String[] urlParts = fileUrl.split(containerName + "/");
+            if (urlParts.length < 2) {
+                log.error("Failed to parse blob URL: {}", fileUrl);
+                return;
+            }
+
+            String blobPath = java.net.URLDecoder.decode(urlParts[1], UTF_8);
+            BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
+            BlobClient blobClient = containerClient.getBlobClient(blobPath);
+
+            if (blobClient.exists()) {
+                blobClient.delete();
+            }
+        } catch (Exception e) {
+            log.error("Error deleting file: {}", e.getMessage());
+        }
+    }
+
+    private void validateFile(MultipartFile file, long maxSize, List<String> allowedTypes) {
+        if (file.isEmpty()) {
+            throw new FileValidationException("File cannot be empty");
+        }
+
+        if (file.getSize() > maxSize) {
+            throw new FileValidationException("File size exceeds maximum allowed size");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !allowedTypes.contains(contentType)) {
+            throw new FileValidationException("Invalid file type. Allowed types: " + allowedTypes);
+        }
+    }
+}

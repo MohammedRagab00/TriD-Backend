@@ -9,13 +9,10 @@ import java.util.Set;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public record ExceptionResponse(
-
         Integer code,
         String message,
         String details,
         Set<String> validationErrors,
         Map<String, String> errors
-
 ) {
 }
-

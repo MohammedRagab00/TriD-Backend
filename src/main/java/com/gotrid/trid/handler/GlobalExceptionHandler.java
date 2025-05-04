@@ -1,187 +1,188 @@
 package com.gotrid.trid.handler;
 
-import com.gotrid.trid.exception.EmailAlreadyExistsException;
-import com.gotrid.trid.exception.InvalidTokenException;
-import com.gotrid.trid.exception.InvalidRefreshTokenException;
-import com.gotrid.trid.exception.TokenExpiredException;
+import com.gotrid.trid.exception.*;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.gotrid.trid.handler.BusinessErrorCodes.*;
-import static org.springframework.http.HttpStatus.*;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(LockedException.class)
-    public ResponseEntity<ExceptionResponse> handleException(
-            LockedException exp
-    ) {
-        return ResponseEntity
-                .status(UNAUTHORIZED)
-                .body(ExceptionResponse.builder()
-                        .code(ACCOUNT_LOCKED.getCode())
-                        .message(exp.getMessage())
-                        .details(ACCOUNT_LOCKED.getDescription())
-                        .build()
-                );
-    }
-
-    @ExceptionHandler(DisabledException.class)
-    public ResponseEntity<ExceptionResponse> handleException(
-            DisabledException exp
-    ) {
-        return ResponseEntity
-                .status(UNAUTHORIZED)
-                .body(ExceptionResponse.builder()
-                        .code(ACCOUNT_DISABLED.getCode())
-                        .message(exp.getMessage())
-                        .details(ACCOUNT_DISABLED.getDescription())
-                        .build()
-                );
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ExceptionResponse> handleException(
-            BadCredentialsException exp
-    ) {
-        return ResponseEntity
-                .status(UNAUTHORIZED)
-                .body(ExceptionResponse.builder()
-                        .code(BAD_CREDENTIALS.getCode())
-                        .message(exp.getMessage())
-                        .details(BAD_CREDENTIALS.getDescription())
-                        .build()
-                );
-    }
-
-    @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<ExceptionResponse> handleException(
-            InvalidTokenException exp
-    ) {
-        return ResponseEntity
-                .status(INVALID_TOKEN.getHttpStatus())
-                .body(ExceptionResponse.builder()
-                        .code(INVALID_TOKEN.getCode())
-                        .message(INVALID_TOKEN.getDescription())
-                        .details(exp.getMessage())
-                        .build()
-                );
-    }
-
-    @ExceptionHandler(MessagingException.class)
-    public ResponseEntity<ExceptionResponse> handleException(
-            MessagingException exp
-    ) {
-        return ResponseEntity
-                .status(INTERNAL_SERVER_ERROR)
-                .body(ExceptionResponse.builder()
-                        .message(exp.getMessage())
-                        .build()
-                );
+    @ExceptionHandler(FileValidationException.class)
+    public ResponseEntity<ExceptionResponse> handleFileValidationException(FileValidationException ex) {
+        log.warn("File validation failed: {}", ex.getMessage());
+        return buildErrorResponse(FILE_VALIDATION_ERROR, ex.getMessage(), null, null);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ExceptionResponse> handleException(
-            MethodArgumentNotValidException exp
-    ) {
-        Set<String> errors = new HashSet<>();
-        exp.getBindingResult().getAllErrors()
-                .forEach(err -> {
-                    var errorMessage = err.getDefaultMessage();
-                    if (errorMessage != null) {
-                        errors.add(errorMessage);
-                    }
-                });
-        return ResponseEntity
-                .status(BAD_REQUEST)
-                .body(ExceptionResponse.builder()
-                        .validationErrors(errors)
-                        .build()
-                );
+    public ResponseEntity<ExceptionResponse> handleValidationException(MethodArgumentNotValidException ex) {
+        Set<String> validationErrors = ex.getBindingResult().getAllErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<String, String> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        error -> error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value",
+                        (existing, replacement) -> existing
+                ));
+
+        return buildErrorResponse(
+                VALIDATION_ERROR,
+                "Validation failed for submitted data",
+                validationErrors,
+                fieldErrors
+        );
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ExceptionResponse> handleEmailExistsException(EmailAlreadyExistsException ex) {
+        log.warn("Email already exists: {}", ex.getMessage());
+        Map<String, String> errors = Map.of("email", "Email address is already registered");
+        return buildErrorResponse(EMAIL_ALREADY_EXISTS, ex.getMessage(), null, errors);
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ExceptionResponse> handleLockedException(LockedException ex) {
+        log.warn("Account locked: {}", ex.getMessage());
+        return buildErrorResponse(
+                ACCOUNT_LOCKED,
+                ex.getMessage(),
+                null,
+                Map.of("account", "Account is locked")
+        );
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ExceptionResponse> handleDisabledException(DisabledException ex) {
+        log.warn("Account disabled: {}", ex.getMessage());
+        return buildErrorResponse(
+                ACCOUNT_DISABLED,
+                ex.getMessage(),
+                null,
+                Map.of("account", "Account is disabled")
+        );
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ExceptionResponse> handleBadCredentialsException(BadCredentialsException ex) {
+        log.warn("Bad credentials: {}", ex.getMessage());
+        return buildErrorResponse(
+                BAD_CREDENTIALS,
+                ex.getMessage(),
+                null,
+                Map.of("credentials", "Invalid email or password")
+        );
+    }
+
+    @ExceptionHandler({InvalidGenderException.class, InvalidAgeException.class})
+    public ResponseEntity<ExceptionResponse> handleCustomValidationException(Exception ex) {
+        log.warn("Validation error: {}", ex.getMessage());
+        return buildErrorResponse(
+                VALIDATION_ERROR,
+                ex.getMessage(),
+                Set.of(ex.getMessage()),
+                null
+        );
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ExceptionResponse> handleInvalidTokenException(InvalidTokenException ex) {
+        log.warn("Invalid token: {}", ex.getMessage());
+        return buildErrorResponse(
+                INVALID_TOKEN,
+                ex.getMessage(),
+                null,
+                Map.of("token", "Token is invalid or malformed")
+        );
     }
 
     @ExceptionHandler(TokenExpiredException.class)
-    public ResponseEntity<ExceptionResponse> handleException(
-            TokenExpiredException exp
-    ) {
-        return ResponseEntity
-                .status(GONE)
-                .body(ExceptionResponse.builder()
-                        .message(exp.getMessage())
-                        .build()
-                );
+    public ResponseEntity<ExceptionResponse> handleTokenExpiredException(TokenExpiredException ex) {
+        log.warn("Token expired: {}", ex.getMessage());
+        return buildErrorResponse(
+                TOKEN_EXPIRED,
+                ex.getMessage(),
+                null,
+                Map.of("token", "Token has expired")
+        );
     }
 
     @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<ExceptionResponse> handleException(
-            AuthorizationDeniedException exp
-    ) {
-        return ResponseEntity
-                .status(CONFLICT)
-                .body(ExceptionResponse.builder()
-                        .code(AUTHORIZATION_DENIED.getCode())
-                        .message(AUTHORIZATION_DENIED.getDescription())
-                        .details("You don't have sufficient permissions to access this resource")
-                        .build()
-                );
+    public ResponseEntity<ExceptionResponse> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
+        log.warn("Authorization denied: {}", ex.getMessage());
+        return buildErrorResponse(
+                AUTHORIZATION_DENIED,
+                "You don't have sufficient permissions to access this resource",
+                null,
+                Map.of("authorization", "Access denied")
+        );
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)
-    public ResponseEntity<ExceptionResponse> handleException(
-            InvalidRefreshTokenException ex) {
-
-        ExceptionResponse response = ExceptionResponse.builder()
-                .code(UNAUTHORIZED.value())
-                .message("Authentication failed")
-                .details(ex.getMessage())
-                .build();
-
-        return new ResponseEntity<>(response, UNAUTHORIZED);
-    }
-
-
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<ExceptionResponse> handleException(
-            EmailAlreadyExistsException exp
-    ) {
-        log.warn("Email already exists: {}", exp.getMessage());
-        return ResponseEntity
-                .status(CONFLICT)
-                .body(ExceptionResponse.builder()
-                        .code(EMAIL_ALREADY_EXISTS.getCode())
-                        .message(EMAIL_ALREADY_EXISTS.getDescription())
-                        .details("The email address is already in use by another account")
-                        .build()
-                );
+    public ResponseEntity<ExceptionResponse> handleInvalidRefreshTokenException(InvalidRefreshTokenException ex) {
+        log.warn("Invalid refresh token: {}", ex.getMessage());
+        return buildErrorResponse(
+                INVALID_REFRESH_TOKEN,
+                ex.getMessage(),
+                null,
+                Map.of("refreshToken", "Invalid refresh token")
+        );
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ExceptionResponse> handleException(
-            Exception exp
-    ) {
-        //todo - log the exception (partially done)
-        log.error("Unhandled exception occurred: {}", exp.getMessage(), exp);
+    public ResponseEntity<ExceptionResponse> handleUnexpectedException(Exception ex) {
+        if (ex instanceof MessagingException) {
+            log.error("Email sending failed: {}", ex.getMessage());
+            return buildErrorResponse(
+                    INTERNAL_ERROR,
+                    "Failed to send email",
+                    null,
+                    Map.of("email", "Failed to send email")
+            );
+        }
 
+        log.error("Unexpected error occurred", ex);
+        return buildErrorResponse(
+                INTERNAL_ERROR,
+                "An unexpected error occurred",  // Don't expose internal error details
+                null,
+                null
+        );
+    }
+
+    private ResponseEntity<ExceptionResponse> buildErrorResponse(
+            BusinessErrorCodes errorCode,
+            String details,
+            Set<String> validationErrors,
+            Map<String, String> errors) {
         return ResponseEntity
-                .status(INTERNAL_SERVER_ERROR)
+                .status(errorCode.getHttpStatus())
                 .body(ExceptionResponse.builder()
-                        .message("Internal error, contact the admin")
-                        .details(exp.getMessage())
+                        .code(errorCode.getCode())
+                        .message(errorCode.getDescription())
+                        .details(details)
+                        .validationErrors(validationErrors)
+                        .errors(errors)
                         .build()
                 );
     }
-
 }

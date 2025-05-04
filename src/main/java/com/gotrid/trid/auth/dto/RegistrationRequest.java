@@ -1,9 +1,9 @@
 package com.gotrid.trid.auth.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
+
+import java.time.LocalDate;
 
 @Builder
 public record RegistrationRequest(
@@ -18,7 +18,15 @@ public record RegistrationRequest(
         String email,
 
         @NotBlank(message = "Password is required")
-        @Size(min = 8, message = "Password must be at least 8 characters")
-        String password
+        @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$",
+                message = "Password must be at least 8 characters long and contain both letters and numbers")
+        String password,
+
+        @NotNull(message = "Date of birth is required")
+        @Past(message = "Date of birth must be in the past")
+        LocalDate birthDate,
+
+        @NotBlank(message = "Gender is required")
+        String gender
 ) {
 }

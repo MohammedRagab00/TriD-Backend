@@ -9,17 +9,28 @@ import static org.springframework.http.HttpStatus.*;
 @Getter
 @AllArgsConstructor
 public enum BusinessErrorCodes {
-    NO_CODE(0, NOT_IMPLEMENTED, "No code"),
-    INCORRECT_PASSWORD(300, BAD_REQUEST, "Incorrect Password"),
-    NEW_PASSWORD_DOES_NOT_MATCH(301, BAD_REQUEST, "New Password Does Not Match"),
-    ACCOUNT_LOCKED(302, FORBIDDEN, "Account Locked"),
-    ACCOUNT_DISABLED(303, FORBIDDEN, "Account Disabled"),
-    BAD_CREDENTIALS(304, BAD_REQUEST, "The email or password provided is incorrect. Please try again."),
-    EMAIL_ALREADY_EXISTS(305, CONFLICT, "Email already registered"),
-    TOKEN_EXPIRED(310, UNAUTHORIZED, "Token Expired"),
-    AUTHORIZATION_DENIED(403, FORBIDDEN, "Access Denied"),
-    INVALID_TOKEN(1008, BAD_REQUEST, "Invalid token"),
-    ;
+    // Authentication & Authorization
+    BAD_CREDENTIALS(1001, UNAUTHORIZED, "The email or password provided is incorrect"),
+    ACCOUNT_LOCKED(1002, FORBIDDEN, "Account is locked"),
+    ACCOUNT_DISABLED(1003, FORBIDDEN, "Account is disabled"),
+    AUTHORIZATION_DENIED(1004, FORBIDDEN, "Access denied"),
+    TOKEN_EXPIRED(1005, UNAUTHORIZED, "Token has expired"),
+    INVALID_TOKEN(1006, UNAUTHORIZED, "Invalid token"),
+    INVALID_REFRESH_TOKEN(1007, UNAUTHORIZED, "Invalid refresh token"),
+
+    // User Management
+    EMAIL_ALREADY_EXISTS(2001, CONFLICT, "Email address already registered"),
+    INCORRECT_PASSWORD(2002, BAD_REQUEST, "Incorrect password"),
+    NEW_PASSWORD_MISMATCH(2003, BAD_REQUEST, "New passwords do not match"),
+
+    // File Operations
+    FILE_VALIDATION_ERROR(3001, BAD_REQUEST, "File validation failed"),
+    FILE_UPLOAD_ERROR(3002, INTERNAL_SERVER_ERROR, "Failed to upload file"),
+    FILE_DELETE_ERROR(3003, INTERNAL_SERVER_ERROR, "Failed to delete file"),
+
+    // General
+    VALIDATION_ERROR(4001, BAD_REQUEST, "Validation failed"),
+    INTERNAL_ERROR(5001, INTERNAL_SERVER_ERROR, "Internal server error");
 
     private final int code;
     private final HttpStatus httpStatus;
