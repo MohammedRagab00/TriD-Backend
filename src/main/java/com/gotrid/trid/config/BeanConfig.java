@@ -23,12 +23,12 @@ public class BeanConfig {
     private final UserDetailsService userDetailsService;
 
     @Value("${azure.storage.connection-string}")
-    private String connectionString;
+    private String CONNECTION_STRING;
 
     @Bean
     public BlobServiceClient blobServiceClient() {
         return new BlobServiceClientBuilder()
-                .connectionString(connectionString)
+                .connectionString(CONNECTION_STRING)
                 .buildClient();
     }
 
@@ -56,6 +56,5 @@ public class BeanConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 
 }

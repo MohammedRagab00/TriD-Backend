@@ -18,10 +18,6 @@ public record RegistrationRequest(
         String email,
 
         @NotBlank(message = "Password is required")
-/*
-        @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
-                message = "Password must be at least 8 characters long and contain at least one letter, one number, and one special character")
-*/
         @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d\\W]{8,}$",
                 message = "Password must be at least 8 characters long and contain at least one letter and one number")
         String password,

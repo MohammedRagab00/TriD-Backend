@@ -1,7 +1,6 @@
 package com.gotrid.trid.config;
 
-
-import com.gotrid.trid.user.Users;
+import com.gotrid.trid.security.userdetails.UserPrincipal;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -21,7 +20,7 @@ public class ApplicationAuditAware implements AuditorAware<Integer> {
         ) {
             return Optional.empty();
         }
-        Users userPrincipal = (Users) authentication.getPrincipal();
-        return Optional.of(userPrincipal.getId());
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        return Optional.of(userPrincipal.user().getId());
     }
 }
