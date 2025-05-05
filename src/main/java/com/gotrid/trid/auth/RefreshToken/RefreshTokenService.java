@@ -1,7 +1,7 @@
 package com.gotrid.trid.auth.RefreshToken;
 
-import com.gotrid.trid.exception.InvalidRefreshTokenException;
-import com.gotrid.trid.user.Users;
+import com.gotrid.trid.exception.custom.InvalidRefreshTokenException;
+import com.gotrid.trid.user.domain.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

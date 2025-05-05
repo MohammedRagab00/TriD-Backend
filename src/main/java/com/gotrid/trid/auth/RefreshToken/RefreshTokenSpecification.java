@@ -1,6 +1,6 @@
 package com.gotrid.trid.auth.RefreshToken;
 
-import com.gotrid.trid.user.Users;
+import com.gotrid.trid.user.domain.Users;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 

@@ -1,11 +1,11 @@
-package com.gotrid.trid.auth.RefreshToken;
+package com.gotrid.trid.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gotrid.trid.infrastructure.common.BaseEntity;
 import com.gotrid.trid.user.domain.Users;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToMany;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,21 +14,23 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Getter
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true, exclude = {"user"})
+@EqualsAndHashCode(callSuper = true, exclude = {"usersSet"})
 @Entity
-public class RefreshToken extends BaseEntity {
+public class Role extends BaseEntity {
 
-    @Column(nullable = false, unique = true)
-    private String token;
+    @Column(unique = true, length = 20)
+    private String name;
 
-    private boolean revoked;
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToMany(mappedBy = "roles")
+    @JsonIgnore
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Users user;
+    private Set<Users> usersSet = new HashSet<>();
 
 }
