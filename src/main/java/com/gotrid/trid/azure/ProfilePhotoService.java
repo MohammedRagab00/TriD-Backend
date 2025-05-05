@@ -33,13 +33,13 @@ public class ProfilePhotoService {
 
 
         String filename = UUID.randomUUID() + getFileExtension(file);
-        String photoUrl = azureStorageService.uploadFile(file, CONTAINER_NAME, filename,
+        String blobName = azureStorageService.uploadFile(file, CONTAINER_NAME, filename,
                 MAX_SIZE, ALLOWED_TYPES);
 
         if (user.getPhoto() != null) {
             azureStorageService.deleteFile(user.getPhoto(), CONTAINER_NAME);
         }
-        user.setPhoto(photoUrl);
+        user.setPhoto(blobName);
         userRepository.save(user);
     }
 

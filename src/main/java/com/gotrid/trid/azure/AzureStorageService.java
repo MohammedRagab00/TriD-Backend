@@ -20,7 +20,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static com.azure.storage.common.sas.SasProtocol.HTTPS_ONLY;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Service
@@ -49,23 +48,16 @@ public class AzureStorageService {
             blobClient.upload(file.getInputStream(), file.getSize(), true);
             blobClient.setHttpHeaders(headers);
 
-            return blobClient.getBlobUrl();
+            return filename;
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload file", e);
         }
     }
 
-    public void deleteFile(String fileUrl, String containerName) {
+    public void deleteFile(String blobName, String containerName) {
         try {
-            String[] urlParts = fileUrl.split(containerName + "/");
-            if (urlParts.length < 2) {
-                log.error("Failed to parse blob URL: {}", fileUrl);
-                return;
-            }
-
-            String blobPath = java.net.URLDecoder.decode(urlParts[1], UTF_8);
             BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
-            BlobClient blobClient = containerClient.getBlobClient(blobPath);
+            BlobClient blobClient = containerClient.getBlobClient(blobName);
 
             if (blobClient.exists()) {
                 blobClient.delete();
@@ -73,6 +65,25 @@ public class AzureStorageService {
         } catch (Exception e) {
             log.error("Error deleting file: {}", e.getMessage());
         }
+    }
+
+    public String getBlobUrlWithSas(String containerName, String blobName) {
+        if (blobName == null || blobName.isEmpty()) {
+            return null;
+        }
+
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
+        BlobClient blobClient = containerClient.getBlobClient(blobName);
+
+        OffsetDateTime expiryTime = OffsetDateTime.now().plusDays(1);
+        BlobSasPermission permission = new BlobSasPermission()
+                .setReadPermission(true);
+
+        BlobServiceSasSignatureValues values = new BlobServiceSasSignatureValues(expiryTime, permission)
+                .setProtocol(HTTPS_ONLY);
+
+        String sasToken = blobClient.generateSas(values);
+        return blobClient.getBlobUrl() + "?" + sasToken;
     }
 
     private void validateFile(MultipartFile file, long maxSize, List<String> allowedTypes) {
@@ -88,28 +99,5 @@ public class AzureStorageService {
         if (contentType == null || !allowedTypes.contains(contentType)) {
             throw new FileValidationException("Invalid file type. Allowed types: " + allowedTypes);
         }
-    }
-
-    public String getBlobUrlWithSas(String containerName, String blobName) {
-        if (blobName == null || blobName.isEmpty()) {
-            return null;
-        }
-
-        if (blobName.startsWith("http")) {
-            blobName = blobName.substring(blobName.lastIndexOf("/") + 1);
-        }
-
-        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
-        BlobClient blobClient = containerClient.getBlobClient(blobName);
-
-        OffsetDateTime expiryTime = OffsetDateTime.now().plusDays(1);
-        BlobSasPermission permission = new BlobSasPermission()
-                .setReadPermission(true);
-
-        BlobServiceSasSignatureValues values = new BlobServiceSasSignatureValues(expiryTime, permission)
-                .setProtocol(HTTPS_ONLY);
-
-        String sasToken = blobClient.generateSas(values);
-        return blobClient.getBlobUrl() + "?" + sasToken;
     }
 }
