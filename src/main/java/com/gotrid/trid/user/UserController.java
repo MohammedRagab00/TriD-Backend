@@ -2,6 +2,7 @@ package com.gotrid.trid.user;
 
 import com.gotrid.trid.user.dto.ChangePasswordRequest;
 import com.gotrid.trid.user.dto.UpdateProfileRequest;
+import com.gotrid.trid.user.dto.UserProfileResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -57,6 +58,19 @@ public class UserController {
     ) {
         userService.updateProfile(userDetails.getUsername(), request);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Get user profile", description = "Retrieve current user's profile information")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Profile retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "User not authenticated")
+    })
+    @GetMapping("/profile")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserProfileResponse> getProfile(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseEntity.ok(userService.getUserProfile(userDetails.getUsername()));
     }
 
     @Operation(summary = "Upload profile photo", description = "Upload or update user's profile photo")

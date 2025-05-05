@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,7 +30,7 @@ public class Role extends BaseEntity {
 
     @ManyToMany(mappedBy = "roles")
     @JsonIgnore
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Users> usersSet = new HashSet<>();
-
 
 }

@@ -20,7 +20,7 @@ public class ProfilePhotoService {
     private final UsersRepository userRepository;
 
     @Value("${azure.storage.pp-container-name}")
-    private String containerName;
+    private String CONTAINER_NAME;
 
     private static final long MAX_SIZE = 5 * 1024 * 1024; // 5MB
     private static final List<String> ALLOWED_TYPES = List.of(
@@ -33,11 +33,11 @@ public class ProfilePhotoService {
 
 
         String filename = UUID.randomUUID() + getFileExtension(file);
-        String photoUrl = azureStorageService.uploadFile(file, containerName, filename,
+        String photoUrl = azureStorageService.uploadFile(file, CONTAINER_NAME, filename,
                 MAX_SIZE, ALLOWED_TYPES);
 
         if (user.getPhoto() != null) {
-            azureStorageService.deleteFile(user.getPhoto(), containerName);
+            azureStorageService.deleteFile(user.getPhoto(), CONTAINER_NAME);
         }
         user.setPhoto(photoUrl);
         userRepository.save(user);
@@ -48,7 +48,7 @@ public class ProfilePhotoService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         if (user.getPhoto() != null) {
-            azureStorageService.deleteFile(user.getPhoto(), containerName);
+            azureStorageService.deleteFile(user.getPhoto(), CONTAINER_NAME);
             user.setPhoto(null);
             userRepository.save(user);
         }
@@ -59,5 +59,12 @@ public class ProfilePhotoService {
         return originalFilename != null && originalFilename.contains(".")
                 ? originalFilename.substring(originalFilename.lastIndexOf("."))
                 : "";
+    }
+
+    public String getPhotoUrl(String photoName) {
+        if (photoName == null) {
+            return null;
+        }
+        return azureStorageService.getBlobUrlWithSas(CONTAINER_NAME, photoName);
     }
 }

@@ -37,5 +37,5 @@ jobs:
 
     - name: Deploy to Azure Web App
       run: |
-        az webapp config container set --name trid --resource-group go-trid --docker-custom-image-name tridimage.azurecr.io/backend_vr:latest --docker-registry-server-url https://tridimage.azurecr.io
+        az webapp config container set --name trid --resource-group go-trid --container-image-name tridimage.azurecr.io/backend_vr:latest --container-registry-url https://tridimage.azurecr.io
         az webapp restart --name trid --resource-group go-trid

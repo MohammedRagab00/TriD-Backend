@@ -5,6 +5,7 @@ import com.gotrid.trid.exception.InvalidAgeException;
 import com.gotrid.trid.exception.InvalidGenderException;
 import com.gotrid.trid.user.dto.ChangePasswordRequest;
 import com.gotrid.trid.user.dto.UpdateProfileRequest;
+import com.gotrid.trid.user.dto.UserProfileResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -67,5 +68,19 @@ public class UserService {
 
     public void deletePhoto(String email) {
         profilePhotoService.deleteProfilePhoto(email);
+    }
+
+    public UserProfileResponse getUserProfile(String email) {
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return new UserProfileResponse(
+                user.getFirstname(),
+                user.getLastname(),
+                user.getEmail(),
+                user.getGender(),
+                user.calculateAge(),
+                profilePhotoService.getPhotoUrl(user.getPhoto())
+        );
     }
 }

@@ -5,6 +5,8 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.models.BlobHttpHeaders;
+import com.azure.storage.blob.sas.BlobSasPermission;
+import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.gotrid.trid.exception.FileValidationException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.List;
 
+import static com.azure.storage.common.sas.SasProtocol.HTTPS_ONLY;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -84,5 +88,28 @@ public class AzureStorageService {
         if (contentType == null || !allowedTypes.contains(contentType)) {
             throw new FileValidationException("Invalid file type. Allowed types: " + allowedTypes);
         }
+    }
+
+    public String getBlobUrlWithSas(String containerName, String blobName) {
+        if (blobName == null || blobName.isEmpty()) {
+            return null;
+        }
+
+        if (blobName.startsWith("http")) {
+            blobName = blobName.substring(blobName.lastIndexOf("/") + 1);
+        }
+
+        BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
+        BlobClient blobClient = containerClient.getBlobClient(blobName);
+
+        OffsetDateTime expiryTime = OffsetDateTime.now().plusDays(1);
+        BlobSasPermission permission = new BlobSasPermission()
+                .setReadPermission(true);
+
+        BlobServiceSasSignatureValues values = new BlobServiceSasSignatureValues(expiryTime, permission)
+                .setProtocol(HTTPS_ONLY);
+
+        String sasToken = blobClient.generateSas(values);
+        return blobClient.getBlobUrl() + "?" + sasToken;
     }
 }

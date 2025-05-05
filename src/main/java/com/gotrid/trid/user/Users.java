@@ -4,7 +4,6 @@ import com.gotrid.trid.common.BaseEntity;
 import com.gotrid.trid.exception.InvalidAgeException;
 import com.gotrid.trid.role.Role;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Past;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashSet;
@@ -104,5 +104,9 @@ public class Users extends BaseEntity implements UserDetails, Principal {
                 ChronoUnit.YEARS.between(dob, LocalDate.now()) < 13) {
             throw new InvalidAgeException("User must be at least 13 years old");
         }
+    }
+
+    public int calculateAge() {
+        return Period.between(dob, LocalDate.now()).getYears();
     }
 }
