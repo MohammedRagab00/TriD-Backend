@@ -74,6 +74,7 @@ public class UserService {
                 user.getEmail(),
                 user.getGender(),
                 user.calculateAge(),
+                user.getDob(),
                 profilePhotoService.getPhotoUrl(user.getPhoto())
         );
     }

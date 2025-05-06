@@ -1,6 +1,7 @@
 package com.gotrid.trid.exception.handler;
 
 import com.gotrid.trid.exception.custom.*;
+import com.gotrid.trid.exception.custom.shop.ShopException;
 import com.gotrid.trid.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.exception.custom.user.InvalidAgeException;
 import com.gotrid.trid.exception.custom.user.InvalidGenderException;
@@ -8,6 +9,7 @@ import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -17,13 +19,14 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.gotrid.trid.exception.handler.BusinessErrorCodes.*;
+import static com.gotrid.trid.exception.handler.BusinessErrorCode.*;
 
 @Slf4j
 @RestControllerAdvice
@@ -83,6 +86,67 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 null,
                 Map.of("account", "Account is disabled")
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ExceptionResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        String message = ex.getMostSpecificCause().getMessage();
+
+        if (message.contains("social_platform_shop_unique")) {
+            log.warn("Duplicate social platform attempt: {}", message);
+            return buildErrorResponse(
+                    INVALID_SOCIAL_LINK,
+                    "This social media platform is already linked to this shop",
+                    null,
+                    Map.of("social", "Platform already exists for this shop")
+            );
+        }
+
+        log.error("Database integrity violation: {}", message);
+        return buildErrorResponse(
+                BusinessErrorCode.INTERNAL_ERROR,
+                "An unexpected database error occurred",
+                null,
+                null
+        );
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ExceptionResponse> handleMissingServletRequestPartException(MissingServletRequestPartException ex) {
+        log.warn("Missing required file: {}", ex.getMessage());
+
+        String partName = ex.getRequestPartName();
+        Map<String, String> errors = Map.of(
+                partName, String.format("The file '%s' is required", partName)
+        );
+
+        return buildErrorResponse(
+                FILE_VALIDATION_ERROR,
+                "Missing required file upload part",
+                null,
+                errors
+        );
+    }
+
+    @ExceptionHandler(ShopException.class)
+    public ResponseEntity<ExceptionResponse> handleShopException(ShopException ex) {
+        BusinessErrorCode errorCode = ex.getErrorCode();
+        String logMessage = String.format("Shop error (%s): %s", errorCode.name(), ex.getMessage());
+
+        if (errorCode.getHttpStatus().is4xxClientError()) {
+            log.warn(logMessage);
+        } else {
+            log.error(logMessage);
+        }
+
+        Map<String, String> errors = Map.of("shop", ex.getMessage());
+
+        return buildErrorResponse(
+                errorCode,
+                ex.getMessage(),
+                null,
+                errors
         );
     }
 
@@ -167,7 +231,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleUnauthorizedShopAccessException(UnAuthorizedException ex) {
         log.warn("Unauthorized access to shop: {}", ex.getMessage());
         return buildErrorResponse(
-                UNAUTHORIZED_SHOP_ACCESS,
+                UNAUTHORIZED_ACCESS,
                 ex.getMessage(),
                 null,
                 Map.of("shop", "You don't have permission to modify this shop")
@@ -208,7 +272,7 @@ public class GlobalExceptionHandler {
     }
 
     private ResponseEntity<ExceptionResponse> buildErrorResponse(
-            BusinessErrorCodes errorCode,
+            BusinessErrorCode errorCode,
             String details,
             Set<String> validationErrors,
             Map<String, String> errors) {

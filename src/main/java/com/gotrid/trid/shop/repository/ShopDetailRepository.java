@@ -12,4 +12,6 @@ public interface ShopDetailRepository extends JpaRepository<ShopDetail, Integer>
     List<ShopDetail> findByLocationContaining(String location);
 
     List<ShopDetail> findByCategory(String category);
+
+    boolean existsByNameIgnoreCase(String name);
 }

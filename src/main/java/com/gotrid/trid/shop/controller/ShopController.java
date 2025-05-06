@@ -2,8 +2,9 @@ package com.gotrid.trid.shop.controller;
 
 import com.gotrid.trid.infrastructure.azure.ShopStorageService;
 import com.gotrid.trid.security.userdetails.UserPrincipal;
-import com.gotrid.trid.shop.domain.Shop;
-import com.gotrid.trid.shop.dto.DetailsShopDTO;
+import com.gotrid.trid.shop.dto.CoordinateDTO;
+import com.gotrid.trid.shop.dto.ShopAssetsDTO;
+import com.gotrid.trid.shop.dto.ShopDetailDTO;
 import com.gotrid.trid.shop.model.Coordinates;
 import com.gotrid.trid.shop.service.ShopService;
 import jakarta.validation.Valid;
@@ -20,15 +21,16 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/shops")
 public class ShopController {
     private final ShopService shopService;
+    private final ShopStorageService shopStorageService;
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<Void> createShop(
-            @RequestBody @Valid DetailsShopDTO detailsShopDTO,
+            @RequestBody @Valid ShopDetailDTO dto,
             @AuthenticationPrincipal UserPrincipal principal) {
 
         Integer ownerId = principal.user().getId();
-        shopService.createShop(ownerId, detailsShopDTO);
+        shopService.createShop(ownerId, dto);
         return ResponseEntity.accepted().build();
     }
 
@@ -36,7 +38,7 @@ public class ShopController {
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<Void> updateShopCoordinates(
             @PathVariable Integer shopId,
-            @RequestBody Coordinates coordinates,
+            @RequestBody CoordinateDTO coordinates,
             @AuthenticationPrincipal UserPrincipal principal) {
 
         Integer ownerId = principal.user().getId();
@@ -50,12 +52,31 @@ public class ShopController {
             @PathVariable Integer shopId,
             @RequestParam("gltf") MultipartFile gltfFile,
             @RequestParam("bin") MultipartFile binFile,
-            @RequestParam("icon") MultipartFile iconFile,
-            @RequestParam("texture") MultipartFile textureFile,
+            @RequestParam(value = "icon", required = false) MultipartFile iconFile,
+            @RequestParam(value = "texture", required = false) MultipartFile textureFile,
             @AuthenticationPrincipal UserPrincipal principal) {
 
         Integer ownerId = principal.user().getId();
-        shopService.uploadShopAssets(ownerId, shopId, gltfFile, binFile, iconFile, textureFile);
+        shopStorageService.uploadShopAssets(ownerId, shopId, gltfFile, binFile, iconFile, textureFile);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{shopId}/edit")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<Void> editShop(
+            @PathVariable Integer shopId,
+            @RequestBody @Valid ShopDetailDTO dto,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        Integer ownerId = principal.user().getId();
+        shopService.updateShop(ownerId, shopId, dto);
+        return ResponseEntity.accepted().build();
+    }
+
+    @GetMapping("/{shopId}/assets")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ShopAssetsDTO> getShopAssets(@PathVariable Integer shopId) {
+        ShopAssetsDTO assets = shopService.getShopAssetDetails(shopId);
+        return ResponseEntity.ok(assets);
     }
 }
