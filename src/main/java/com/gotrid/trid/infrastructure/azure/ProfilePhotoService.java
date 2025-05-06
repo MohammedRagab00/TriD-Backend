@@ -10,8 +10,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.UUID;
+
+import static com.gotrid.trid.infrastructure.azure.AzureStorageService.ALLOWED_TYPES;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Service
@@ -24,14 +25,11 @@ public class ProfilePhotoService {
     private String CONTAINER_NAME;
 
     private static final long MAX_SIZE = 5 * 1024 * 1024; // 5MB
-    private static final List<String> ALLOWED_TYPES = List.of(
-            "image/jpeg", "image/png", "image/jpg"
-    );
 
     public void updateProfilePhoto(String email, MultipartFile file) {
         var user = getUserByEmail(email);
 
-        String filename = UUID.randomUUID() + getFileExtension(file);
+        String filename = UUID.randomUUID() + azureStorageService.getFileExtension(file);
         String blobName = azureStorageService.uploadFile(file, CONTAINER_NAME, filename,
                 MAX_SIZE, ALLOWED_TYPES);
 
@@ -52,12 +50,6 @@ public class ProfilePhotoService {
         }
     }
 
-    private String getFileExtension(MultipartFile file) {
-        String originalFilename = file.getOriginalFilename();
-        return originalFilename != null && originalFilename.contains(".")
-                ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                : "";
-    }
 
     public String getPhotoUrl(String photoName) {
         if (photoName == null) {

@@ -30,7 +30,12 @@ public enum BusinessErrorCodes {
 
     // General
     VALIDATION_ERROR(4001, BAD_REQUEST, "Validation failed"),
-    INTERNAL_ERROR(5001, INTERNAL_SERVER_ERROR, "Internal server error");
+    INTERNAL_ERROR(5001, INTERNAL_SERVER_ERROR, "Internal server error"),
+
+    // Shop Management
+    SHOP_NOT_FOUND(6001, NOT_FOUND, "Requested shop does not exist"),
+    UNAUTHORIZED_SHOP_ACCESS(6002, FORBIDDEN, "You don’t have permission to modify this shop"),
+    ;
 
     private final int code;
     private final HttpStatus httpStatus;

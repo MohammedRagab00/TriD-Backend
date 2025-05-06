@@ -1,8 +1,12 @@
 package com.gotrid.trid.exception.handler;
 
 import com.gotrid.trid.exception.custom.*;
+import com.gotrid.trid.exception.custom.shop.ShopNotFoundException;
+import com.gotrid.trid.exception.custom.user.InvalidAgeException;
+import com.gotrid.trid.exception.custom.user.InvalidGenderException;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -147,6 +151,40 @@ public class GlobalExceptionHandler {
                 Map.of("refreshToken", "Invalid refresh token")
         );
     }
+
+    @ExceptionHandler(ShopNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleShopNotFoundException(ShopNotFoundException ex) {
+        log.warn("Shop not found: {}", ex.getMessage());
+        return buildErrorResponse(
+                SHOP_NOT_FOUND,
+                ex.getMessage(),
+                null,
+                Map.of("shop", "Requested shop does not exist")
+        );
+    }
+
+    @ExceptionHandler(UnAuthorizedException.class)
+    public ResponseEntity<ExceptionResponse> handleUnauthorizedShopAccessException(UnAuthorizedException ex) {
+        log.warn("Unauthorized access to shop: {}", ex.getMessage());
+        return buildErrorResponse(
+                UNAUTHORIZED_SHOP_ACCESS,
+                ex.getMessage(),
+                null,
+                Map.of("shop", "You don't have permission to modify this shop")
+        );
+    }
+
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<ExceptionResponse> handleFileUploadException(FileUploadException ex) {
+        log.error("File upload failed: {}", ex.getMessage());
+        return buildErrorResponse(
+                FILE_UPLOAD_ERROR,
+                "Error occurred while uploading shop assets",
+                null,
+                Map.of("file", "Failed to process uploaded file")
+        );
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ExceptionResponse> handleUnexpectedException(Exception ex) {

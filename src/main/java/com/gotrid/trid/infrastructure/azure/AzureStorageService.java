@@ -27,6 +27,10 @@ import static com.azure.storage.common.sas.SasProtocol.HTTPS_ONLY;
 public class AzureStorageService {
     private final BlobServiceClient blobServiceClient;
 
+    public static final List<String> ALLOWED_TYPES = List.of(
+            "image/jpeg", "image/png", "image/jpg"
+    );
+
     @PostConstruct
     public void initialize() {
         if (blobServiceClient == null) {
@@ -99,5 +103,12 @@ public class AzureStorageService {
         if (contentType == null || !allowedTypes.contains(contentType)) {
             throw new FileValidationException("Invalid file type. Allowed types: " + allowedTypes);
         }
+    }
+
+    public String getFileExtension(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        return originalFilename != null && originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                : "";
     }
 }

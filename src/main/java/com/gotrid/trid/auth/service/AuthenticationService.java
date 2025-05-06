@@ -5,17 +5,22 @@ import com.gotrid.trid.auth.RefreshToken.RefreshTokenService;
 import com.gotrid.trid.auth.dto.AuthenticationRequest;
 import com.gotrid.trid.auth.dto.AuthenticationResponse;
 import com.gotrid.trid.auth.dto.RegistrationRequest;
-import com.gotrid.trid.exception.custom.*;
+import com.gotrid.trid.auth.token.Token;
+import com.gotrid.trid.auth.token.TokenRepository;
+import com.gotrid.trid.exception.custom.EmailAlreadyExistsException;
+import com.gotrid.trid.exception.custom.InvalidRefreshTokenException;
+import com.gotrid.trid.exception.custom.InvalidTokenException;
+import com.gotrid.trid.exception.custom.TokenExpiredException;
+import com.gotrid.trid.exception.custom.user.InvalidAgeException;
+import com.gotrid.trid.exception.custom.user.InvalidGenderException;
 import com.gotrid.trid.infrastructure.email.service.EmailService;
-import com.gotrid.trid.user.model.Role;
-import com.gotrid.trid.user.repository.RoleRepository;
 import com.gotrid.trid.security.jwt.JwtService;
 import com.gotrid.trid.security.userdetails.UserPrincipal;
 import com.gotrid.trid.user.domain.Gender;
 import com.gotrid.trid.user.domain.Users;
+import com.gotrid.trid.user.model.Role;
+import com.gotrid.trid.user.repository.RoleRepository;
 import com.gotrid.trid.user.repository.UsersRepository;
-import com.gotrid.trid.auth.token.Token;
-import com.gotrid.trid.auth.token.TokenRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +42,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.gotrid.trid.infrastructure.email.service.EmailTemplateName.ACTIVATE_ACCOUNT;
-import static com.gotrid.trid.infrastructure.email.service.EmailTemplateName.RESET_PASSWORD;
 import static com.gotrid.trid.auth.token.TokenType.ACTIVATION;
 import static com.gotrid.trid.auth.token.TokenType.PASSWORD_RESET;
+import static com.gotrid.trid.infrastructure.email.service.EmailTemplateName.ACTIVATE_ACCOUNT;
+import static com.gotrid.trid.infrastructure.email.service.EmailTemplateName.RESET_PASSWORD;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Service

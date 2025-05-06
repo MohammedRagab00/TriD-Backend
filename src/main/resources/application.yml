@@ -55,3 +55,4 @@ azure:
   storage:
     connection-string: ${AZURE_CONNECTION_STRING}
     pp-container-name: ${AZURE_PP_CONTAINER_NAME}
+    shop-container-name: ${AZURE_SHOP_CONTAINER_NAME}

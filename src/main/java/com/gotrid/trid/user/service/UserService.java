@@ -1,7 +1,7 @@
 package com.gotrid.trid.user.service;
 
-import com.gotrid.trid.exception.custom.InvalidAgeException;
-import com.gotrid.trid.exception.custom.InvalidGenderException;
+import com.gotrid.trid.exception.custom.user.InvalidAgeException;
+import com.gotrid.trid.exception.custom.user.InvalidGenderException;
 import com.gotrid.trid.infrastructure.azure.ProfilePhotoService;
 import com.gotrid.trid.user.domain.Gender;
 import com.gotrid.trid.user.domain.Users;

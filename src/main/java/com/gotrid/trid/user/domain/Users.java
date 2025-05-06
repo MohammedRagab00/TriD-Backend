@@ -1,7 +1,7 @@
 package com.gotrid.trid.user.domain;
 
 import com.gotrid.trid.infrastructure.common.BaseEntity;
-import com.gotrid.trid.exception.custom.InvalidAgeException;
+import com.gotrid.trid.exception.custom.user.InvalidAgeException;
 import com.gotrid.trid.user.model.Role;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
