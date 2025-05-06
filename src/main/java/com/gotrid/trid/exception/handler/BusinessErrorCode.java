@@ -8,7 +8,7 @@ import static org.springframework.http.HttpStatus.*;
 
 @Getter
 @AllArgsConstructor
-public enum BusinessErrorCodes {
+public enum BusinessErrorCode {
     // Authentication & Authorization
     BAD_CREDENTIALS(1001, UNAUTHORIZED, "The email or password provided is incorrect"),
     ACCOUNT_LOCKED(1002, FORBIDDEN, "Account is locked"),
@@ -33,8 +33,11 @@ public enum BusinessErrorCodes {
     INTERNAL_ERROR(5001, INTERNAL_SERVER_ERROR, "Internal server error"),
 
     // Shop Management
-    SHOP_NOT_FOUND(6001, NOT_FOUND, "Requested shop does not exist"),
-    UNAUTHORIZED_SHOP_ACCESS(6002, FORBIDDEN, "You don’t have permission to modify this shop"),
+    SHOP_NOT_FOUND(6001, NOT_FOUND, "Shop not found"),
+    SHOP_NAME_EXISTS(6002, CONFLICT, "Shop name already exists"),
+    UNAUTHORIZED_ACCESS(6003, FORBIDDEN, "Unauthorized shop access"),
+    INVALID_SOCIAL_LINK(6005, BAD_REQUEST, "Invalid social media link"),
+    SHOP_ASSET_ERROR(6006, BAD_REQUEST, "Shop asset error"),
     ;
 
     private final int code;

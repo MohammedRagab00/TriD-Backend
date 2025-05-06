@@ -3,6 +3,7 @@ package com.gotrid.trid.infrastructure.azure;
 import com.gotrid.trid.exception.custom.UnAuthorizedException;
 import com.gotrid.trid.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.shop.domain.Shop;
+import com.gotrid.trid.shop.dto.AssetUrlsDTO;
 import com.gotrid.trid.shop.model.AssetInfo;
 import com.gotrid.trid.shop.repository.ShopRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,51 +41,67 @@ public class ShopStorageService {
 
         String basePath = ownerId + "/" + shopId + "/";
 
-        String binFilename = "binFile" + azureStorageService.getFileExtension(binFile),
-                gltfFilename = "gltfFile" + azureStorageService.getFileExtension(gltfFile),
-                iconFilename = "iconFile" + azureStorageService.getFileExtension(iconFile),
-                textureFilename = "textureFile" + azureStorageService.getFileExtension(textureFile);
-
         if (shop.getAssetInfo() == null) {
             shop.setAssetInfo(new AssetInfo());
         }
 
-        if (!gltfFile.isEmpty()) {
+        if (gltfFile != null && !gltfFile.isEmpty()) {
             if (shop.getAssetInfo().getGltf() != null) {
                 azureStorageService.deleteFile(shop.getAssetInfo().getGltf(), CONTAINER_NAME);
             }
+            String gltfFilename = "gltfFile" + azureStorageService.getFileExtension(gltfFile);
             shop.getAssetInfo().setGltf(
                     azureStorageService.uploadFile(gltfFile, CONTAINER_NAME, basePath + gltfFilename, MAX_SIZE, List.of("model/gltf+json"))
             );
         }
 
-        if (!binFile.isEmpty()) {
+        if (binFile != null && !binFile.isEmpty()) {
             if (shop.getAssetInfo().getBin() != null) {
                 azureStorageService.deleteFile(shop.getAssetInfo().getBin(), CONTAINER_NAME);
             }
+            String binFilename = "binFile" + azureStorageService.getFileExtension(binFile);
             shop.getAssetInfo().setBin(
                     azureStorageService.uploadFile(binFile, CONTAINER_NAME, basePath + binFilename, MAX_SIZE, List.of("application/octet-stream"))
             );
         }
 
-        if (!iconFile.isEmpty()) {
+        if (iconFile != null && !iconFile.isEmpty()) {
             if (shop.getAssetInfo().getIcon() != null) {
                 azureStorageService.deleteFile(shop.getAssetInfo().getIcon(), CONTAINER_NAME);
             }
+            String iconFilename = "iconFile" + azureStorageService.getFileExtension(iconFile);
             shop.getAssetInfo().setIcon(
                     azureStorageService.uploadFile(iconFile, CONTAINER_NAME, basePath + iconFilename, MAX_SIZE, ALLOWED_TYPES)
             );
         }
 
-        if (!textureFile.isEmpty()) {
+        if (textureFile != null && !textureFile.isEmpty()) {
             if (shop.getAssetInfo().getTexture() != null) {
                 azureStorageService.deleteFile(shop.getAssetInfo().getTexture(), CONTAINER_NAME);
             }
+            String textureFilename = "textureFile" + azureStorageService.getFileExtension(textureFile);
             shop.getAssetInfo().setTexture(
                     azureStorageService.uploadFile(textureFile, CONTAINER_NAME, basePath + textureFilename, MAX_SIZE, ALLOWED_TYPES)
             );
         }
 
         shopRepository.save(shop);
+    }
+
+    public AssetUrlsDTO getShopAssetUrls(Integer shopId) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new ShopNotFoundException("Shop not found"));
+
+        AssetInfo assetInfo = shop.getAssetInfo();
+        if (assetInfo == null) {
+            return new AssetUrlsDTO(null, null, null, null);
+        }
+
+        return new AssetUrlsDTO(
+                assetInfo.getGltf() != null ? azureStorageService.getBlobUrlWithSas(CONTAINER_NAME, assetInfo.getGltf()) : null,
+                assetInfo.getBin() != null ? azureStorageService.getBlobUrlWithSas(CONTAINER_NAME, assetInfo.getBin()) : null,
+                assetInfo.getIcon() != null ? azureStorageService.getBlobUrlWithSas(CONTAINER_NAME, assetInfo.getIcon()) : null,
+                assetInfo.getTexture() != null ? azureStorageService.getBlobUrlWithSas(CONTAINER_NAME, assetInfo.getTexture()) : null
+        );
     }
 }

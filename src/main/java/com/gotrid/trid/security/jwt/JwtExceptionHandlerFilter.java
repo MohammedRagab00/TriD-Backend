@@ -16,7 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static com.gotrid.trid.exception.handler.BusinessErrorCodes.TOKEN_EXPIRED;
+import static com.gotrid.trid.exception.handler.BusinessErrorCode.TOKEN_EXPIRED;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
