@@ -6,14 +6,13 @@ import com.gotrid.trid.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.infrastructure.azure.ShopStorageService;
 import com.gotrid.trid.shop.domain.Shop;
 import com.gotrid.trid.shop.domain.ShopDetail;
-import com.gotrid.trid.shop.dto.AssetUrlsDTO;
-import com.gotrid.trid.shop.dto.CoordinateDTO;
-import com.gotrid.trid.shop.dto.ShopAssetsDTO;
-import com.gotrid.trid.shop.dto.ShopDetailDTO;
+import com.gotrid.trid.shop.dto.*;
 import com.gotrid.trid.shop.mapper.CoordinateMapper;
 import com.gotrid.trid.shop.mapper.ShopDetailMapper;
+import com.gotrid.trid.shop.mapper.SocialMapper;
 import com.gotrid.trid.shop.model.AssetInfo;
 import com.gotrid.trid.shop.model.Coordinates;
+import com.gotrid.trid.shop.model.Social;
 import com.gotrid.trid.shop.repository.ShopDetailRepository;
 import com.gotrid.trid.shop.repository.ShopRepository;
 import com.gotrid.trid.user.domain.Users;
@@ -32,9 +31,10 @@ public class ShopService {
     private final ShopDetailMapper shopDetailMapper;
     private final ShopStorageService shopStorageService;
     private final CoordinateMapper coordinateMapper;
+    private final SocialMapper socialMapper;
 
     @Transactional
-    public void createShop(Integer ownerId, ShopDetailDTO dto) {
+    public Integer createShop(Integer ownerId, ShopDetailDTO dto) {
         if (shopDetailRepository.existsByNameIgnoreCase(dto.name())) {
             throw new ShopException(
                     SHOP_NAME_EXISTS,
@@ -48,6 +48,30 @@ public class ShopService {
                 .shopDetail(shopDetail)
                 .owner(Users.builder().id(ownerId).build())
                 .build();
+
+        return shopRepository.saveAndFlush(shop).getId();
+    }
+
+    @Transactional(readOnly = true)
+    public ShopDetailResponse getShop(Integer shopId) {
+        Shop shop = findShopById(shopId);
+        return shopDetailMapper.toResponse(shop.getShopDetail());
+    }
+
+    @Transactional
+    public void updateShopSocial(Integer ownerId, Integer shopId, SocialDTO socialDTO) {
+        Shop shop = findShopById(shopId);
+        validateOwnership(shop, ownerId);
+
+        ShopDetail shopDetail = shop.getShopDetail();
+
+        Social social = shopDetail.getSocials().stream()
+                .filter(s -> s.getPlatform().equals(socialDTO.platform()))
+                .findFirst()
+                .map(s -> socialMapper.updateExisting(s, socialDTO))
+                .orElseGet(() -> socialMapper.toEntity(socialDTO, shopDetail));
+
+        shopDetail.getSocials().add(social);
 
         shopRepository.save(shop);
     }

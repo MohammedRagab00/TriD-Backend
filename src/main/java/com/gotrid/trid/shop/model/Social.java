@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+
+import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 
 @Getter
 @Setter
@@ -25,5 +28,6 @@ public class Social extends BaseEntity {
     String link;
 
     @ManyToOne
+    @OnDelete(action = CASCADE)
     private ShopDetail shop;
 }

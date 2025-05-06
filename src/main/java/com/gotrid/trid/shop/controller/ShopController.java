@@ -2,10 +2,7 @@ package com.gotrid.trid.shop.controller;
 
 import com.gotrid.trid.infrastructure.azure.ShopStorageService;
 import com.gotrid.trid.security.userdetails.UserPrincipal;
-import com.gotrid.trid.shop.dto.CoordinateDTO;
-import com.gotrid.trid.shop.dto.ShopAssetsDTO;
-import com.gotrid.trid.shop.dto.ShopDetailDTO;
-import com.gotrid.trid.shop.model.Coordinates;
+import com.gotrid.trid.shop.dto.*;
 import com.gotrid.trid.shop.service.ShopService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
+
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @RestController
 @RequestMapping("/shops")
@@ -25,13 +24,23 @@ public class ShopController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<Void> createShop(
+    public ResponseEntity<Integer> createShop(
             @RequestBody @Valid ShopDetailDTO dto,
             @AuthenticationPrincipal UserPrincipal principal) {
 
         Integer ownerId = principal.user().getId();
-        shopService.createShop(ownerId, dto);
-        return ResponseEntity.accepted().build();
+        Integer shopId = shopService.createShop(ownerId, dto);
+
+        return ResponseEntity
+                .created(URI.create("/api/v1/shops/" + shopId))
+                .body(shopId);
+    }
+
+    @GetMapping("/{shopId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ShopDetailResponse> getShop(@PathVariable Integer shopId) {
+        ShopDetailResponse shop = shopService.getShop(shopId);
+        return ResponseEntity.ok(shop);
     }
 
     @PutMapping("/{shopId}/coordinates")
@@ -78,5 +87,17 @@ public class ShopController {
     public ResponseEntity<ShopAssetsDTO> getShopAssets(@PathVariable Integer shopId) {
         ShopAssetsDTO assets = shopService.getShopAssetDetails(shopId);
         return ResponseEntity.ok(assets);
+    }
+
+    @PutMapping("/{shopId}/socials")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<Void> updateShopSocial(
+            @PathVariable Integer shopId,
+            @RequestBody @Valid SocialDTO social,
+            @AuthenticationPrincipal UserPrincipal principal) {
+
+        Integer ownerId = principal.user().getId();
+        shopService.updateShopSocial(ownerId, shopId, social);
+        return ResponseEntity.accepted().build();
     }
 }

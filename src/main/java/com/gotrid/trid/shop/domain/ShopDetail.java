@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -33,6 +33,10 @@ public class ShopDetail extends AuditableEntity {
     private String email;
     private String phone;
 
-    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Social> socials = new ArrayList<>();
+    @OneToMany(
+            mappedBy = "shop",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private Set<Social> socials = new HashSet<>();
 }
