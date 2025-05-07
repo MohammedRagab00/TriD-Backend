@@ -12,7 +12,7 @@ public class SocialMapper {
         return Social.builder()
                 .platform(dto.platform())
                 .link(dto.link())
-                .shop(shopDetail)
+                .shopDetail(shopDetail)
                 .build();
     }
 

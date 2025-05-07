@@ -4,6 +4,7 @@ import com.gotrid.trid.exception.custom.UnAuthorizedException;
 import com.gotrid.trid.exception.custom.shop.ShopException;
 import com.gotrid.trid.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.infrastructure.azure.ShopStorageService;
+import com.gotrid.trid.infrastructure.common.PageResponse;
 import com.gotrid.trid.shop.domain.Shop;
 import com.gotrid.trid.shop.domain.ShopDetail;
 import com.gotrid.trid.shop.dto.*;
@@ -18,8 +19,14 @@ import com.gotrid.trid.shop.repository.ShopRepository;
 import com.gotrid.trid.user.domain.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static com.gotrid.trid.exception.handler.BusinessErrorCode.SHOP_NAME_EXISTS;
 
@@ -43,19 +50,14 @@ public class ShopService {
         }
 
         ShopDetail shopDetail = shopDetailMapper.toEntity(dto);
-
         Shop shop = Shop.builder()
                 .shopDetail(shopDetail)
                 .owner(Users.builder().id(ownerId).build())
                 .build();
 
-        return shopRepository.saveAndFlush(shop).getId();
-    }
+        shopDetail.setShop(shop);
 
-    @Transactional(readOnly = true)
-    public ShopDetailResponse getShop(Integer shopId) {
-        Shop shop = findShopById(shopId);
-        return shopDetailMapper.toResponse(shop.getShopDetail());
+        return shopRepository.saveAndFlush(shop).getId();
     }
 
     @Transactional
@@ -122,12 +124,42 @@ public class ShopService {
         shopRepository.save(shop);
     }
 
+    @Transactional(readOnly = true)
+    public ShopDetailResponse getShop(Integer shopId) {
+        ShopDetail shop = findShopDetailById(shopId);
+        return shopDetailMapper.toResponse(shop);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<ShopDetailResponse> getAllShops(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+        Page<ShopDetail> shopsPage = shopDetailRepository.findAll(pageable);
+
+        List<ShopDetailResponse> shopResponses = shopsPage.stream()
+                .map(shopDetailMapper::toResponse)
+                .toList();
+
+        return new PageResponse<>(
+                shopResponses,
+                shopsPage.getNumber(),
+                shopsPage.getSize(),
+                shopsPage.getTotalElements(),
+                shopsPage.getTotalPages(),
+                shopsPage.isFirst(),
+                shopsPage.isLast()
+        );
+    }
 
     //* * * * Helper methods * * * *//
 
     private Shop findShopById(Integer shopId) {
         return shopRepository.findById(shopId)
                 .orElseThrow(() -> new ShopNotFoundException("Shop not found"));
+    }
+
+    private ShopDetail findShopDetailById(Integer shopDetailId) {
+        return shopDetailRepository.findById(shopDetailId)
+                .orElseThrow(() -> new ShopNotFoundException("Shop Details not found"));
     }
 
     private void validateOwnership(Shop shop, Integer ownerId) {

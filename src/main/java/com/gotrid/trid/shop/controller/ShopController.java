@@ -1,6 +1,7 @@
 package com.gotrid.trid.shop.controller;
 
 import com.gotrid.trid.infrastructure.azure.ShopStorageService;
+import com.gotrid.trid.infrastructure.common.PageResponse;
 import com.gotrid.trid.security.userdetails.UserPrincipal;
 import com.gotrid.trid.shop.dto.*;
 import com.gotrid.trid.shop.service.ShopService;
@@ -44,18 +45,6 @@ public class ShopController {
         Integer ownerId = principal.user().getId();
         Integer shopId = shopService.createShop(ownerId, dto);
         return ResponseEntity.created(URI.create("/api/v1/shops/" + shopId)).body(shopId);
-    }
-
-    @Operation(summary = "Get shop details", description = "Retrieves details of a specific shop")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Shop details retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "Shop not found")
-    })
-    @GetMapping("/{shopId}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ShopDetailResponse> getShop(
-            @Parameter(description = "ID of the shop") @PathVariable Integer shopId) {
-        return ResponseEntity.ok(shopService.getShop(shopId));
     }
 
     @Operation(summary = "Update shop coordinates", description = "Updates the 3D coordinates of a shop")
@@ -135,5 +124,29 @@ public class ShopController {
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
         shopService.updateShopSocial(principal.user().getId(), shopId, social);
         return ResponseEntity.accepted().build();
+    }
+
+    @Operation(summary = "Get all shops", description = "Retrieves all shops with pagination")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Shops retrieved successfully")
+    })
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PageResponse<ShopDetailResponse>> getAllShops(
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size) {
+        return ResponseEntity.ok(shopService.getAllShops(page, size));
+    }
+
+    @Operation(summary = "Get shop details", description = "Retrieves details of a specific shop")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Shop details retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Shop not found")
+    })
+    @GetMapping("/{shopId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ShopDetailResponse> getShop(
+            @Parameter(description = "ID of the shop") @PathVariable Integer shopId) {
+        return ResponseEntity.ok(shopService.getShop(shopId));
     }
 }

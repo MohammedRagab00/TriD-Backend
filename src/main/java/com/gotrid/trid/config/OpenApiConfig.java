@@ -23,7 +23,7 @@ public class OpenApiConfig {
                         )
                 )
                 .info(new Info()
-                        .title("User Profile API")
+                        .title("Ya Rab Fok El Day's API")
                         .description("API for managing user profiles")
                         .version("1.0"));
     }

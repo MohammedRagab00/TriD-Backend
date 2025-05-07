@@ -16,7 +16,7 @@ import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true, exclude = {"shop"})
+@EqualsAndHashCode(callSuper = true, exclude = {"shopDetail"})
 @Entity
 @Table(
         uniqueConstraints = @UniqueConstraint(columnNames = {"platform", "shop_id"})
@@ -28,6 +28,7 @@ public class Social extends BaseEntity {
     String link;
 
     @ManyToOne
+    @JoinColumn(name = "shop_id", nullable = false)
     @OnDelete(action = CASCADE)
-    private ShopDetail shop;
+    private ShopDetail shopDetail;
 }

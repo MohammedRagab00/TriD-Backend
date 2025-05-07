@@ -6,6 +6,7 @@ import java.util.List;
 
 @Builder
 public record ShopDetailResponse(
+        Integer id,
         String name,
         String category,
         String location,
