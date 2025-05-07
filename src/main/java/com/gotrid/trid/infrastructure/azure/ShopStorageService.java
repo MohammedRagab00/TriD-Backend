@@ -4,7 +4,7 @@ import com.gotrid.trid.exception.custom.UnAuthorizedException;
 import com.gotrid.trid.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.shop.domain.Shop;
 import com.gotrid.trid.shop.dto.AssetUrlsDTO;
-import com.gotrid.trid.shop.model.AssetInfo;
+import com.gotrid.trid.shop.model.ModelAsset;
 import com.gotrid.trid.shop.repository.ShopRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,46 +41,46 @@ public class ShopStorageService {
 
         String basePath = ownerId + "/" + shopId + "/";
 
-        if (shop.getAssetInfo() == null) {
-            shop.setAssetInfo(new AssetInfo());
+        if (shop.getModelAsset() == null) {
+            shop.setModelAsset(new ModelAsset());
         }
 
         if (gltfFile != null && !gltfFile.isEmpty()) {
-            if (shop.getAssetInfo().getGltf() != null) {
-                azureStorageService.deleteFile(shop.getAssetInfo().getGltf(), CONTAINER_NAME);
+            if (shop.getModelAsset().getGltf() != null) {
+                azureStorageService.deleteFile(shop.getModelAsset().getGltf(), CONTAINER_NAME);
             }
             String gltfFilename = "gltfFile" + azureStorageService.getFileExtension(gltfFile);
-            shop.getAssetInfo().setGltf(
+            shop.getModelAsset().setGltf(
                     azureStorageService.uploadFile(gltfFile, CONTAINER_NAME, basePath + gltfFilename, MAX_SIZE, List.of("model/gltf+json"))
             );
         }
 
         if (binFile != null && !binFile.isEmpty()) {
-            if (shop.getAssetInfo().getBin() != null) {
-                azureStorageService.deleteFile(shop.getAssetInfo().getBin(), CONTAINER_NAME);
+            if (shop.getModelAsset().getBin() != null) {
+                azureStorageService.deleteFile(shop.getModelAsset().getBin(), CONTAINER_NAME);
             }
             String binFilename = "binFile" + azureStorageService.getFileExtension(binFile);
-            shop.getAssetInfo().setBin(
+            shop.getModelAsset().setBin(
                     azureStorageService.uploadFile(binFile, CONTAINER_NAME, basePath + binFilename, MAX_SIZE, List.of("application/octet-stream"))
             );
         }
 
         if (iconFile != null && !iconFile.isEmpty()) {
-            if (shop.getAssetInfo().getIcon() != null) {
-                azureStorageService.deleteFile(shop.getAssetInfo().getIcon(), CONTAINER_NAME);
+            if (shop.getModelAsset().getIcon() != null) {
+                azureStorageService.deleteFile(shop.getModelAsset().getIcon(), CONTAINER_NAME);
             }
             String iconFilename = "iconFile" + azureStorageService.getFileExtension(iconFile);
-            shop.getAssetInfo().setIcon(
+            shop.getModelAsset().setIcon(
                     azureStorageService.uploadFile(iconFile, CONTAINER_NAME, basePath + iconFilename, MAX_SIZE, ALLOWED_TYPES)
             );
         }
 
         if (textureFile != null && !textureFile.isEmpty()) {
-            if (shop.getAssetInfo().getTexture() != null) {
-                azureStorageService.deleteFile(shop.getAssetInfo().getTexture(), CONTAINER_NAME);
+            if (shop.getModelAsset().getTexture() != null) {
+                azureStorageService.deleteFile(shop.getModelAsset().getTexture(), CONTAINER_NAME);
             }
             String textureFilename = "textureFile" + azureStorageService.getFileExtension(textureFile);
-            shop.getAssetInfo().setTexture(
+            shop.getModelAsset().setTexture(
                     azureStorageService.uploadFile(textureFile, CONTAINER_NAME, basePath + textureFilename, MAX_SIZE, ALLOWED_TYPES)
             );
         }
@@ -92,16 +92,16 @@ public class ShopStorageService {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new ShopNotFoundException("Shop not found"));
 
-        AssetInfo assetInfo = shop.getAssetInfo();
-        if (assetInfo == null) {
+        ModelAsset modelAsset = shop.getModelAsset();
+        if (modelAsset == null) {
             return new AssetUrlsDTO(null, null, null, null);
         }
 
         return new AssetUrlsDTO(
-                assetInfo.getGltf() != null ? azureStorageService.getBlobUrlWithSas(CONTAINER_NAME, assetInfo.getGltf()) : null,
-                assetInfo.getBin() != null ? azureStorageService.getBlobUrlWithSas(CONTAINER_NAME, assetInfo.getBin()) : null,
-                assetInfo.getIcon() != null ? azureStorageService.getBlobUrlWithSas(CONTAINER_NAME, assetInfo.getIcon()) : null,
-                assetInfo.getTexture() != null ? azureStorageService.getBlobUrlWithSas(CONTAINER_NAME, assetInfo.getTexture()) : null
+                modelAsset.getGltf() != null ? azureStorageService.getBlobUrlWithSas(CONTAINER_NAME, modelAsset.getGltf()) : null,
+                modelAsset.getBin() != null ? azureStorageService.getBlobUrlWithSas(CONTAINER_NAME, modelAsset.getBin()) : null,
+                modelAsset.getIcon() != null ? azureStorageService.getBlobUrlWithSas(CONTAINER_NAME, modelAsset.getIcon()) : null,
+                modelAsset.getTexture() != null ? azureStorageService.getBlobUrlWithSas(CONTAINER_NAME, modelAsset.getTexture()) : null
         );
     }
 }

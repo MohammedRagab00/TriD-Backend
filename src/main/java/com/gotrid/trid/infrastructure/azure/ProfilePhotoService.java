@@ -1,7 +1,7 @@
 package com.gotrid.trid.infrastructure.azure;
 
 import com.gotrid.trid.user.domain.Users;
-import com.gotrid.trid.user.repository.UsersRepository;
+import com.gotrid.trid.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import static com.gotrid.trid.infrastructure.azure.AzureStorageService.ALLOWED_T
 @Slf4j
 public class ProfilePhotoService {
     private final AzureStorageService azureStorageService;
-    private final UsersRepository userRepository;
+    private final UserRepository userRepository;
 
     @Value("${azure.storage.pp-container-name}")
     private String CONTAINER_NAME;
