@@ -2,6 +2,7 @@ package com.gotrid.trid.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
@@ -23,8 +24,12 @@ public class OpenApiConfig {
                         )
                 )
                 .info(new Info()
-                        .title("Ya Rab Fok El Day's API")
-                        .description("API for managing user profiles")
-                        .version("1.0"));
+                        .title("Ya Rab Fok El Day'a")
+                        .description("API for managing TriD")
+                        .version("1.0")
+                        .contact(new Contact()
+                                .name("support team")
+                                .email("gotrid.dev@gmail.com"))
+                );
     }
 }

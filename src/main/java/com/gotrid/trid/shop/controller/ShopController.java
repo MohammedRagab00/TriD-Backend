@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.net.URI;
 
 @Tag(name = "Shop", description = "Shop management APIs")
-@SecurityRequirement(name = "bearerAuth")
+@SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @RestController
 @RequestMapping("/shops")
