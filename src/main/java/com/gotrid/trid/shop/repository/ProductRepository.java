@@ -7,7 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
-    List<Product> findByDetails_NameContaining(String name);
 
-    List<Product> findByDetails_BasePriceBetween(Double minPrice, Double maxPrice);
+    List<Product> findByNameContaining(String name);
+
+    List<Product> findByBasePriceBetween(Double minPrice, Double maxPrice);
 }

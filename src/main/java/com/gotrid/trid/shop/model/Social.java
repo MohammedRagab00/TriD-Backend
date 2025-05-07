@@ -1,7 +1,7 @@
 package com.gotrid.trid.shop.model;
 
 import com.gotrid.trid.infrastructure.common.BaseEntity;
-import com.gotrid.trid.shop.domain.ShopDetail;
+import com.gotrid.trid.shop.domain.Shop;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -16,7 +16,7 @@ import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true, exclude = {"shopDetail"})
+@EqualsAndHashCode(callSuper = true, exclude = {"shop"})
 @Entity
 @Table(
         uniqueConstraints = @UniqueConstraint(columnNames = {"platform", "shop_id"})
@@ -30,5 +30,5 @@ public class Social extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "shop_id", nullable = false)
     @OnDelete(action = CASCADE)
-    private ShopDetail shopDetail;
+    private Shop shop;
 }

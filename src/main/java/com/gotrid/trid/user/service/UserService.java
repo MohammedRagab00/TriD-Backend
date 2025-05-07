@@ -8,7 +8,7 @@ import com.gotrid.trid.user.domain.Users;
 import com.gotrid.trid.user.dto.ChangePasswordRequest;
 import com.gotrid.trid.user.dto.UpdateProfileRequest;
 import com.gotrid.trid.user.dto.UserProfileResponse;
-import com.gotrid.trid.user.repository.UsersRepository;
+import com.gotrid.trid.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -24,7 +24,7 @@ import java.time.LocalDate;
 @Service
 @Transactional
 public class UserService {
-    private final UsersRepository userRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ProfilePhotoService profilePhotoService;
 

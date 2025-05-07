@@ -18,12 +18,12 @@ import lombok.experimental.SuperBuilder;
         uniqueConstraints = @UniqueConstraint(columnNames = {"color", "size"})
 )
 public class ProductVariant extends BaseEntity {
-    @ManyToOne(cascade = CascadeType.ALL)
-    private ProductDetail product;
-
     private String color;
     @Column(length = 20)
     private String size;
     private int stock;
     private double price;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Product product;
 }

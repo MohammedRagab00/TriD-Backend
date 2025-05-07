@@ -3,7 +3,7 @@ package com.gotrid.trid.shop.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-public record ShopDetailDTO(
+public record ShopRequest(
         @NotBlank(message = "Name is required")
         String name,
         String category,

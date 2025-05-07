@@ -20,7 +20,7 @@ import com.gotrid.trid.user.domain.Gender;
 import com.gotrid.trid.user.domain.Users;
 import com.gotrid.trid.user.model.Role;
 import com.gotrid.trid.user.repository.RoleRepository;
-import com.gotrid.trid.user.repository.UsersRepository;
+import com.gotrid.trid.user.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +53,7 @@ public class AuthenticationService {
 
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UsersRepository userRepository;
+    private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
     private final EmailService emailService;
     private final AuthenticationManager authenticationManager;

@@ -5,7 +5,7 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record ShopDetailResponse(
+public record ShopResponse(
         Integer id,
         String name,
         String category,

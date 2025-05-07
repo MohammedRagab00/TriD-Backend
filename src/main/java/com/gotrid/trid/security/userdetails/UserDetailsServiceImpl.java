@@ -1,6 +1,6 @@
 package com.gotrid.trid.security.userdetails;
 
-import com.gotrid.trid.user.repository.UsersRepository;
+import com.gotrid.trid.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final UsersRepository repository;
+    private final UserRepository repository;
 
     @Override
     @Transactional

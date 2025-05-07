@@ -40,7 +40,7 @@ public class ShopController {
     @PostMapping("/create")
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<Integer> createShop(
-            @RequestBody @Valid ShopDetailDTO dto,
+            @RequestBody @Valid ShopRequest dto,
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
         Integer ownerId = principal.user().getId();
         Integer shopId = shopService.createShop(ownerId, dto);
@@ -92,7 +92,7 @@ public class ShopController {
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<Void> editShop(
             @Parameter(description = "ID of the shop") @PathVariable Integer shopId,
-            @RequestBody @Valid ShopDetailDTO dto,
+            @RequestBody @Valid ShopRequest dto,
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
         shopService.updateShop(principal.user().getId(), shopId, dto);
         return ResponseEntity.accepted().build();
@@ -132,7 +132,7 @@ public class ShopController {
     })
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<PageResponse<ShopDetailResponse>> getAllShops(
+    public ResponseEntity<PageResponse<ShopResponse>> getAllShops(
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size) {
         return ResponseEntity.ok(shopService.getAllShops(page, size));
@@ -145,7 +145,7 @@ public class ShopController {
     })
     @GetMapping("/{shopId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ShopDetailResponse> getShop(
+    public ResponseEntity<ShopResponse> getShop(
             @Parameter(description = "ID of the shop") @PathVariable Integer shopId) {
         return ResponseEntity.ok(shopService.getShop(shopId));
     }
