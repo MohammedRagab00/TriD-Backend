@@ -26,7 +26,7 @@ public class Shop extends AuditableEntity {
     @Embedded
     private AssetInfo assetInfo;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "shop")
     private ShopDetail shopDetail;
 
     @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL)

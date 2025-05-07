@@ -28,6 +28,7 @@ public class ShopDetailMapper {
                 .collect(Collectors.toList());
 
         return ShopDetailResponse.builder()
+                .id(entity.getId())
                 .name(entity.getName())
                 .category(entity.getCategory())
                 .location(entity.getLocation())
