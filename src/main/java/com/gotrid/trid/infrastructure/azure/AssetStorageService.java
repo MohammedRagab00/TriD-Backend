@@ -1,8 +1,7 @@
 package com.gotrid.trid.infrastructure.azure;
 
-import com.gotrid.trid.shop.dto.AssetUrlsDTO;
-import com.gotrid.trid.shop.model.ModelAsset;
-import lombok.NoArgsConstructor;
+import com.gotrid.trid.api.shop.dto.AssetUrlsDTO;
+import com.gotrid.trid.core.shop.model.ModelAsset;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,11 +1,11 @@
 package com.gotrid.trid.infrastructure.azure;
 
-import com.gotrid.trid.exception.custom.UnAuthorizedException;
-import com.gotrid.trid.exception.custom.shop.ShopNotFoundException;
-import com.gotrid.trid.shop.domain.Shop;
-import com.gotrid.trid.shop.dto.AssetUrlsDTO;
-import com.gotrid.trid.shop.model.ModelAsset;
-import com.gotrid.trid.shop.repository.ShopRepository;
+import com.gotrid.trid.common.exception.custom.UnAuthorizedException;
+import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
+import com.gotrid.trid.core.shop.model.Shop;
+import com.gotrid.trid.api.shop.dto.AssetUrlsDTO;
+import com.gotrid.trid.core.shop.model.ModelAsset;
+import com.gotrid.trid.core.shop.repository.ShopRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
