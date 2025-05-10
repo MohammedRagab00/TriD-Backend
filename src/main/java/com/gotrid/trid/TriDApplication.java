@@ -1,7 +1,7 @@
 package com.gotrid.trid;
 
-import com.gotrid.trid.user.model.Role;
-import com.gotrid.trid.user.repository.RoleRepository;
+import com.gotrid.trid.core.user.model.Role;
+import com.gotrid.trid.core.user.repository.RoleRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,7 +20,7 @@ public class TriDApplication {
         SpringApplication.run(TriDApplication.class, args);
     }
 
-//    @Bean
+    @Bean
     public CommandLineRunner runner(
             RoleRepository roleRepository
     ) {
@@ -29,13 +29,6 @@ public class TriDApplication {
                 roleRepository.save(
                         Role.builder()
                                 .name("ROLE_SELLER")
-                                .build()
-                );
-            }
-            if (roleRepository.findByName("ROLE_USER").isEmpty()) {
-                roleRepository.save(
-                        Role.builder()
-                                .name("ROLE_USER")
                                 .build()
                 );
             }

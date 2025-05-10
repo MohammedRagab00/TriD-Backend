@@ -10,8 +10,8 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
-#  profiles:
-#    active: dev
+  profiles:
+    active: dev
   servlet:
     multipart:
       max-file-size: 300MB
@@ -56,3 +56,4 @@ azure:
     connection-string: ${AZURE_CONNECTION_STRING}
     pp-container-name: ${AZURE_PP_CONTAINER_NAME}
     shop-container-name: ${AZURE_SHOP_CONTAINER_NAME}
+    product-container-name: ${AZURE_PRODUCT_CONTAINER_NAME}
