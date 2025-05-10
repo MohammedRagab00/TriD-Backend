@@ -1,12 +1,17 @@
 package com.gotrid.trid.shop.service;
 
-import com.gotrid.trid.exception.custom.UnAuthorizedException;
 import com.gotrid.trid.exception.custom.shop.ShopException;
 import com.gotrid.trid.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.infrastructure.azure.ShopStorageService;
 import com.gotrid.trid.infrastructure.common.PageResponse;
 import com.gotrid.trid.shop.domain.Shop;
-import com.gotrid.trid.shop.dto.*;
+import com.gotrid.trid.shop.domain.product.Product;
+import com.gotrid.trid.shop.dto.AssetUrlsDTO;
+import com.gotrid.trid.shop.dto.CoordinateDTO;
+import com.gotrid.trid.shop.dto.ModelAssetsDTO;
+import com.gotrid.trid.shop.dto.SocialDTO;
+import com.gotrid.trid.shop.dto.shop.ShopRequest;
+import com.gotrid.trid.shop.dto.shop.ShopResponse;
 import com.gotrid.trid.shop.mapper.CoordinateMapper;
 import com.gotrid.trid.shop.mapper.ShopMapper;
 import com.gotrid.trid.shop.mapper.SocialMapper;
@@ -16,7 +21,6 @@ import com.gotrid.trid.shop.model.Social;
 import com.gotrid.trid.shop.repository.ShopRepository;
 import com.gotrid.trid.user.domain.Users;
 import com.gotrid.trid.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,18 +31,36 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.gotrid.trid.exception.handler.BusinessErrorCode.SHOP_NAME_EXISTS;
 
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Service
-public class ShopService {
+public class ShopService extends BaseModelService {
     private final UserRepository userRepository;
     private final ShopStorageService shopStorageService;
     private final ShopRepository shopRepository;
     private final ShopMapper shopMapper;
     private final SocialMapper socialMapper;
-    private final CoordinateMapper coordinateMapper;
+    private final ProductService productService;
+
+    @Autowired
+    public ShopService(CoordinateMapper coordinateMapper,
+                       UserRepository userRepository,
+                       ShopStorageService shopStorageService,
+                       ShopRepository shopRepository,
+                       ShopMapper shopMapper,
+                       SocialMapper socialMapper,
+                       ProductService productService) {
+        super(coordinateMapper);
+        this.userRepository = userRepository;
+        this.shopStorageService = shopStorageService;
+        this.shopRepository = shopRepository;
+        this.shopMapper = shopMapper;
+        this.socialMapper = socialMapper;
+        this.productService = productService;
+    }
 
     @Transactional
     public Integer createShop(Integer ownerId, ShopRequest req) {
@@ -60,7 +82,7 @@ public class ShopService {
     @Transactional
     public void updateShopSocial(Integer ownerId, Integer shopId, SocialDTO socialDTO) {
         Shop shop = findShopById(shopId);
-        validateOwnership(shop, ownerId);
+        validateOwnership(ownerId, shop.getOwner().getId(), "You are not authorized to update this shop");
 
         Social social = shop.getSocials().stream()
                 .filter(s -> s.getPlatform().equals(socialDTO.platform()))
@@ -69,49 +91,38 @@ public class ShopService {
                 .orElseGet(() -> socialMapper.toEntity(socialDTO, shop));
 
         shop.getSocials().add(social);
-
-        shopRepository.save(shop);
-    }
-
-    @Transactional
-    public void updateShop(Integer ownerId, Integer shopId, ShopRequest dto) {
-        Shop shop = findShopById(shopId);
-        validateOwnership(shop, ownerId);
-        validateShopName(shop, dto.name());
-
-        updateShop(shop, dto);
-
         shopRepository.save(shop);
     }
 
     @Transactional
     public void updateShopCoordinates(Integer ownerId, Integer shopId, CoordinateDTO coordinates) {
         Shop shop = findShopById(shopId);
-        validateOwnership(shop, ownerId);
+        validateOwnership(ownerId, shop.getOwner().getId(), "You are not authorized to update this shop");
 
-        ModelAsset modelAsset = shop.getModelAsset() != null ?
-                shop.getModelAsset() : new ModelAsset();
-
-        Coordinates updatedCoordinates = modelAsset.getCoordinates() != null ?
-                modelAsset.getCoordinates() :
-                new Coordinates();
+        ModelAsset modelAsset = getOrCreateModelAsset(shop.getModelAsset());
+        Coordinates updatedCoordinates = getOrCreateCoordinates(modelAsset);
 
         updateCoordinates(updatedCoordinates, coordinates);
-
         modelAsset.setCoordinates(updatedCoordinates);
         shop.setModelAsset(modelAsset);
 
         shopRepository.save(shop);
     }
 
-    public ShopAssetsDTO getShopAssetDetails(Integer shopId) {
+    public ModelAssetsDTO getShopAssetDetails(Integer shopId) {
         Shop shop = findShopById(shopId);
-
         AssetUrlsDTO urls = shopStorageService.getShopAssetUrls(shopId);
-        CoordinateDTO coordinates = shop.getModelAsset() != null && shop.getModelAsset().getCoordinates() != null ?
-                coordinateMapper.toDTO(shop.getModelAsset().getCoordinates()) : null;
+        return createAssetDetails(shop.getModelAsset(), urls);
+    }
 
-        return new ShopAssetsDTO(urls, coordinates);
+    @Transactional
+    public void updateShop(Integer ownerId, Integer shopId, ShopRequest dto) {
+        Shop shop = findShopById(shopId);
+        validateOwnership(ownerId, shop.getOwner().getId(), "You are not authorized to update this shop");
+        validateShopName(shop, dto.name());
+
+        updateShop(shop, dto);
+        shopRepository.save(shop);
     }
 
     @Transactional(readOnly = true)
@@ -140,17 +151,24 @@ public class ShopService {
         );
     }
 
-    //* * * * Helper methods * * * *//
+    @Transactional
+    public void deleteShop(Integer ownerId, Integer shopId) {
+        Shop shop = findShopById(shopId);
+        validateOwnership(ownerId, shop.getOwner().getId(),
+                "Unauthorized: You don't own this shop to be able to delete it");
+
+        Set<Integer> productIds = shop.getProducts().stream()
+                .map(Product::getId)
+                .collect(Collectors.toSet());
+
+        productIds.forEach(productId -> productService.deleteProduct(productId, ownerId));
+        shopStorageService.deleteShopAssets(shopId);
+        shopRepository.delete(shop);
+    }
 
     private Shop findShopById(Integer shopId) {
         return shopRepository.findById(shopId)
                 .orElseThrow(() -> new ShopNotFoundException("Shop not found"));
-    }
-
-    private void validateOwnership(Shop shop, Integer ownerId) {
-        if (!shop.getOwner().getId().equals(ownerId)) {
-            throw new UnAuthorizedException("You are not authorized to update this shop");
-        }
     }
 
     private void validateShopName(Shop shop, String newName) {
@@ -170,17 +188,5 @@ public class ShopService {
         shop.setDescription(updateDTO.description());
         shop.setEmail(updateDTO.email());
         shop.setPhone(updateDTO.phone());
-    }
-
-    private void updateCoordinates(Coordinates coordinates, CoordinateDTO dto) {
-        coordinates.setX_pos(dto.x_pos());
-        coordinates.setY_pos(dto.y_pos());
-        coordinates.setZ_pos(dto.z_pos());
-        coordinates.setX_scale(dto.x_scale());
-        coordinates.setY_scale(dto.y_scale());
-        coordinates.setZ_scale(dto.z_scale());
-        coordinates.setX_rot(dto.x_rot());
-        coordinates.setY_rot(dto.y_rot());
-        coordinates.setZ_rot(dto.z_rot());
     }
 }

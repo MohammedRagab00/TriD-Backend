@@ -1,4 +1,4 @@
-package com.gotrid.trid.shop.dto;
+package com.gotrid.trid.shop.dto.shop;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -13,9 +13,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.OnDelete;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.hibernate.annotations.OnDeleteAction.CASCADE;
@@ -52,7 +50,7 @@ public class Shop extends AuditableEntity {
     private ModelAsset modelAsset;
 
     @OneToMany(mappedBy = "shop")
-    private List<Product> products = new ArrayList<>();
+    private Set<Product> products = new HashSet<>();
 
     @ManyToOne
     @OnDelete(action = CASCADE)

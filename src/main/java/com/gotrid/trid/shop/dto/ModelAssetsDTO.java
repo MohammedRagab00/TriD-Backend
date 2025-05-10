@@ -1,6 +1,6 @@
 package com.gotrid.trid.shop.dto;
 
-public record ShopAssetsDTO(
+public record ModelAssetsDTO(
         AssetUrlsDTO urls,
         CoordinateDTO coordinates
 ) {

@@ -1,8 +1,10 @@
 package com.gotrid.trid.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gotrid.trid.exception.handler.BusinessErrorCode;
 import com.gotrid.trid.exception.handler.ExceptionResponse;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static com.gotrid.trid.exception.handler.BusinessErrorCode.INVALID_JWT_SIGNATURE;
 import static com.gotrid.trid.exception.handler.BusinessErrorCode.TOKEN_EXPIRED;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
@@ -33,17 +36,21 @@ public class JwtExceptionHandlerFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException ex) {
-            ExceptionResponse errorResponse = ExceptionResponse.builder()
-                    .code(TOKEN_EXPIRED.getCode())
-                    .message(TOKEN_EXPIRED.getDescription())
-                    .details("Your session has expired. Please use the refresh token to get a new one.")
-                    .build();
-
-            response.setStatus(UNAUTHORIZED.value());
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-            objectMapper.writeValue(response.getWriter(), errorResponse);
+            handleJwtException(response, TOKEN_EXPIRED, "Your session has expired. Please use the refresh token to get a new one.");
+        } catch (SignatureException ex) {
+            handleJwtException(response, INVALID_JWT_SIGNATURE, "Invalid token signature");
         }
+    }
 
+    private void handleJwtException(HttpServletResponse response, BusinessErrorCode errorCode, String details) throws IOException {
+        ExceptionResponse errorResponse = ExceptionResponse.builder()
+                .code(errorCode.getCode())
+                .message(errorCode.getDescription())
+                .details(details)
+                .build();
+
+        response.setStatus(UNAUTHORIZED.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        objectMapper.writeValue(response.getWriter(), errorResponse);
     }
 }

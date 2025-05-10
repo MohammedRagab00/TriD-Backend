@@ -2,16 +2,17 @@ package com.gotrid.trid.user.service;
 
 import com.gotrid.trid.exception.custom.user.InvalidAgeException;
 import com.gotrid.trid.exception.custom.user.InvalidGenderException;
+import com.gotrid.trid.exception.custom.user.InvalidPasswordException;
 import com.gotrid.trid.infrastructure.azure.ProfilePhotoService;
 import com.gotrid.trid.user.domain.Gender;
 import com.gotrid.trid.user.domain.Users;
 import com.gotrid.trid.user.dto.ChangePasswordRequest;
 import com.gotrid.trid.user.dto.UpdateProfileRequest;
 import com.gotrid.trid.user.dto.UserProfileResponse;
+import com.gotrid.trid.user.mapper.UserMapper;
 import com.gotrid.trid.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,12 +28,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ProfilePhotoService profilePhotoService;
+    private final UserMapper userMapper;
 
     public void changePassword(String email, ChangePasswordRequest request) {
         Users user = getUserByEmail(email);
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Current password is incorrect");
+            throw new InvalidPasswordException("Current password is incorrect");
         }
 
         user.setPassword(passwordEncoder.encode(request.newPassword()));
@@ -68,15 +70,7 @@ public class UserService {
     public UserProfileResponse getUserProfile(String email) {
         var user = getUserByEmail(email);
 
-        return new UserProfileResponse(
-                user.getFirstname(),
-                user.getLastname(),
-                user.getEmail(),
-                user.getGender(),
-                user.calculateAge(),
-                user.getDob(),
-                profilePhotoService.getPhotoUrl(user.getPhoto())
-        );
+        return userMapper.toProfileResponse(user);
     }
 
     private Users getUserByEmail(String email) {

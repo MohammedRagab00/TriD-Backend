@@ -3,7 +3,11 @@ package com.gotrid.trid.shop.controller;
 import com.gotrid.trid.infrastructure.azure.ShopStorageService;
 import com.gotrid.trid.infrastructure.common.PageResponse;
 import com.gotrid.trid.security.userdetails.UserPrincipal;
-import com.gotrid.trid.shop.dto.*;
+import com.gotrid.trid.shop.dto.CoordinateDTO;
+import com.gotrid.trid.shop.dto.ModelAssetsDTO;
+import com.gotrid.trid.shop.dto.SocialDTO;
+import com.gotrid.trid.shop.dto.shop.ShopRequest;
+import com.gotrid.trid.shop.dto.shop.ShopResponse;
 import com.gotrid.trid.shop.service.ShopService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -105,7 +109,7 @@ public class ShopController {
     })
     @GetMapping("/{shopId}/assets")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ShopAssetsDTO> getShopAssets(
+    public ResponseEntity<ModelAssetsDTO> getShopAssets(
             @Parameter(description = "ID of the shop") @PathVariable Integer shopId) {
         return ResponseEntity.ok(shopService.getShopAssetDetails(shopId));
     }
@@ -148,5 +152,20 @@ public class ShopController {
     public ResponseEntity<ShopResponse> getShop(
             @Parameter(description = "ID of the shop") @PathVariable Integer shopId) {
         return ResponseEntity.ok(shopService.getShop(shopId));
+    }
+
+    @Operation(summary = "Delete shop", description = "Deletes a shop and all its associated products and assets")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Shop deleted successfully"),
+            @ApiResponse(responseCode = "403", description = "Not authorized"),
+            @ApiResponse(responseCode = "404", description = "Shop not found")
+    })
+    @DeleteMapping("/{shopId}")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<Void> deleteShop(
+            @Parameter(description = "ID of the shop") @PathVariable Integer shopId,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
+        shopService.deleteShop(principal.user().getId(), shopId);
+        return ResponseEntity.noContent().build();
     }
 }

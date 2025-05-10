@@ -1,10 +1,10 @@
 package com.gotrid.trid.user.controller;
 
 import com.gotrid.trid.security.userdetails.UserPrincipal;
-import com.gotrid.trid.user.service.UserService;
 import com.gotrid.trid.user.dto.ChangePasswordRequest;
 import com.gotrid.trid.user.dto.UpdateProfileRequest;
 import com.gotrid.trid.user.dto.UserProfileResponse;
+import com.gotrid.trid.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -34,7 +34,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid current password or password mismatch"),
             @ApiResponse(responseCode = "401", description = "User not authenticated")
     })
-    @PutMapping("/password")
+    @PatchMapping("/password")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> changePassword(
             @RequestBody @Valid ChangePasswordRequest request,

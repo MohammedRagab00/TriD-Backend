@@ -1,13 +1,17 @@
 package com.gotrid.trid.exception.handler;
 
 import com.gotrid.trid.exception.custom.*;
+import com.gotrid.trid.exception.custom.product.DuplicateResourceException;
+import com.gotrid.trid.exception.custom.product.ProductNotFoundException;
 import com.gotrid.trid.exception.custom.shop.ShopException;
 import com.gotrid.trid.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.exception.custom.user.InvalidAgeException;
 import com.gotrid.trid.exception.custom.user.InvalidGenderException;
+import com.gotrid.trid.exception.custom.user.InvalidPasswordException;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +19,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.util.Map;
@@ -36,6 +42,76 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleFileValidationException(FileValidationException ex) {
         log.warn("File validation failed: {}", ex.getMessage());
         return buildErrorResponse(FILE_VALIDATION_ERROR, ex.getMessage(), null, null);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ExceptionResponse> handleHandlerMethodValidationException(HandlerMethodValidationException ex) {
+        Set<String> validationErrors = ex.getValueResults().stream()
+                .flatMap(result -> result.getResolvableErrors().stream())
+                .map(MessageSourceResolvable::getDefaultMessage)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<String, String> fieldErrors = ex.getValueResults().stream()
+                .collect(Collectors.toMap(
+                        result -> result.getMethodParameter().getParameterName(),
+                        result -> result.getResolvableErrors().stream()
+                                .findFirst()
+                                .map(MessageSourceResolvable::getDefaultMessage)
+                                .orElse("Invalid value"),
+                        (existing, replacement) -> existing
+                ));
+
+        return buildErrorResponse(
+                VALIDATION_ERROR,
+                "Validation failed for submitted data",
+                validationErrors,
+                fieldErrors
+        );
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleUsernameNotFoundException(UsernameNotFoundException ex) {
+        log.warn("User not found: {}", ex.getMessage());
+        return buildErrorResponse(
+                USER_NOT_FOUND,
+                ex.getMessage(),
+                null,
+                Map.of("user", "User not found")
+        );
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ExceptionResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.warn("Invalid argument: {}", ex.getMessage());
+        return buildErrorResponse(
+                INVALID_ARGUMENT,
+                ex.getMessage(),
+                null,
+                Map.of("argument", "Invalid value provided")
+        );
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ExceptionResponse> handleDuplicateResourceException(DuplicateResourceException ex) {
+        log.warn("Duplicate resource: {}", ex.getMessage());
+        return buildErrorResponse(
+                DUPLICATE_RESOURCE,
+                ex.getMessage(),
+                null,
+                Map.of("resource", "Resource already exists")
+        );
+    }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleProductNotFoundException(ProductNotFoundException ex) {
+        log.warn("Product not found: {}", ex.getMessage());
+        return buildErrorResponse(
+                PRODUCT_NOT_FOUND,
+                ex.getMessage(),
+                null,
+                Map.of("product", "Product not found")
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -159,6 +235,16 @@ public class GlobalExceptionHandler {
                 null,
                 Map.of("credentials", "Invalid email or password")
         );
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<ExceptionResponse> handleInvalidPasswordException(InvalidPasswordException ex) {
+        log.warn("Invalid Password attempt: {}", ex.getMessage());
+        return buildErrorResponse(
+                INVALID_PASSWORD,
+                ex.getMessage(),
+                null,
+                Map.of("password", "The provided password is incorrect"));
     }
 
     @ExceptionHandler({InvalidGenderException.class, InvalidAgeException.class})

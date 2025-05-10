@@ -25,17 +25,10 @@ public class TriDApplication {
             RoleRepository roleRepository
     ) {
         return args -> {
-            if (roleRepository.findByName("ROLE_SELLER").isEmpty()) {
+            if (roleRepository.findByName("ROLE_ADMIN").isEmpty()) {
                 roleRepository.save(
                         Role.builder()
-                                .name("ROLE_SELLER")
-                                .build()
-                );
-            }
-            if (roleRepository.findByName("ROLE_USER").isEmpty()) {
-                roleRepository.save(
-                        Role.builder()
-                                .name("ROLE_USER")
+                                .name("ROLE_ADMIN")
                                 .build()
                 );
             }

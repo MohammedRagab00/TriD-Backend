@@ -1,5 +1,6 @@
-package com.gotrid.trid.shop.dto;
+package com.gotrid.trid.shop.dto.shop;
 
+import com.gotrid.trid.shop.dto.SocialDTO;
 import lombok.Builder;
 
 import java.util.List;
