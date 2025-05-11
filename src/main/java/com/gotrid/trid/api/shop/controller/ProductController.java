@@ -27,6 +27,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @RestController
 @RequestMapping("/products")
@@ -180,7 +182,7 @@ public class ProductController {
             @ApiResponse(responseCode = "400", description = "Invalid files"),
             @ApiResponse(responseCode = "403", description = "Not authorized")
     })
-    @PutMapping("/{productId}/upload-assets")
+    @PutMapping(value = "/{productId}/upload-assets", consumes = MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<Void> uploadProductFiles(
             @Parameter(description = "ID of the product") @PathVariable Integer productId,

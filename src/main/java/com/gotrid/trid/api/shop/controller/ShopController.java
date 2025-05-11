@@ -1,16 +1,17 @@
 package com.gotrid.trid.api.shop.controller;
 
-import com.gotrid.trid.infrastructure.azure.ShopStorageService;
-import com.gotrid.trid.common.response.PageResponse;
-import com.gotrid.trid.config.security.userdetails.UserPrincipal;
 import com.gotrid.trid.api.shop.dto.CoordinateDTO;
 import com.gotrid.trid.api.shop.dto.ModelAssetsDTO;
 import com.gotrid.trid.api.shop.dto.SocialDTO;
 import com.gotrid.trid.api.shop.dto.shop.ShopRequest;
 import com.gotrid.trid.api.shop.dto.shop.ShopResponse;
 import com.gotrid.trid.api.shop.service.ShopService;
+import com.gotrid.trid.common.response.PageResponse;
+import com.gotrid.trid.config.security.userdetails.UserPrincipal;
+import com.gotrid.trid.infrastructure.azure.ShopStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
+
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @Tag(name = "Shop", description = "Shop management APIs")
 @SecurityRequirement(name = "Bearer Authentication")
@@ -73,7 +76,7 @@ public class ShopController {
             @ApiResponse(responseCode = "400", description = "Invalid files"),
             @ApiResponse(responseCode = "403", description = "Not authorized")
     })
-    @PutMapping("/{shopId}/upload-assets")
+    @PutMapping(value = "/{shopId}/upload-assets", consumes = MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<Void> uploadShopFiles(
             @Parameter(description = "ID of the shop") @PathVariable Integer shopId,
