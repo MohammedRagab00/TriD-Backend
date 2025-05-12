@@ -100,6 +100,12 @@ public class AzureStorageService {
         }
 
         String contentType = file.getContentType();
+/*
+        String filename = file.getOriginalFilename();
+        if (filename != null && filename.endsWith(".gltf")) {
+            return;
+        }
+*/
         if (contentType == null || !allowedTypes.contains(contentType)) {
             throw new FileValidationException("Invalid file type. Allowed types: " + allowedTypes);
         }
