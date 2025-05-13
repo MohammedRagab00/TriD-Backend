@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import static com.azure.storage.common.sas.SasProtocol.HTTPS_ONLY;
+import static com.azure.storage.common.sas.SasProtocol.HTTPS_HTTP;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Service
@@ -84,7 +84,7 @@ public class AzureStorageService {
                 .setReadPermission(true);
 
         BlobServiceSasSignatureValues values = new BlobServiceSasSignatureValues(expiryTime, permission)
-                .setProtocol(HTTPS_ONLY)
+                .setProtocol(HTTPS_HTTP)
                 .setContentDisposition("attachment; filename=" + extractFilename(blobName)); // Extracts original filename
 
         String sasToken = blobClient.generateSas(values);
