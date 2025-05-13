@@ -1,26 +1,26 @@
 package com.gotrid.trid.api.auth.service;
 
-import com.gotrid.trid.core.auth.refresh.RefreshToken;
-import com.gotrid.trid.core.auth.refresh.RefreshTokenService;
 import com.gotrid.trid.api.auth.dto.AuthenticationRequest;
 import com.gotrid.trid.api.auth.dto.AuthenticationResponse;
 import com.gotrid.trid.api.auth.dto.RegistrationRequest;
-import com.gotrid.trid.core.auth.token.Token;
-import com.gotrid.trid.core.auth.token.TokenRepository;
 import com.gotrid.trid.common.exception.custom.EmailAlreadyExistsException;
 import com.gotrid.trid.common.exception.custom.InvalidRefreshTokenException;
 import com.gotrid.trid.common.exception.custom.InvalidTokenException;
 import com.gotrid.trid.common.exception.custom.TokenExpiredException;
 import com.gotrid.trid.common.exception.custom.user.InvalidAgeException;
 import com.gotrid.trid.common.exception.custom.user.InvalidGenderException;
-import com.gotrid.trid.infrastructure.email.service.EmailService;
 import com.gotrid.trid.config.security.jwt.JwtService;
 import com.gotrid.trid.config.security.userdetails.UserPrincipal;
+import com.gotrid.trid.core.auth.refresh.RefreshToken;
+import com.gotrid.trid.core.auth.refresh.RefreshTokenService;
+import com.gotrid.trid.core.auth.token.Token;
+import com.gotrid.trid.core.auth.token.TokenRepository;
 import com.gotrid.trid.core.user.model.Gender;
-import com.gotrid.trid.core.user.model.Users;
 import com.gotrid.trid.core.user.model.Role;
+import com.gotrid.trid.core.user.model.Users;
 import com.gotrid.trid.core.user.repository.RoleRepository;
 import com.gotrid.trid.core.user.repository.UserRepository;
+import com.gotrid.trid.infrastructure.email.service.EmailService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -257,7 +257,7 @@ public class AuthenticationService {
     @Transactional
     public void resetPassword(String tokenString, String newPassword) {
         Token resetToken = tokenRepository.findByToken(tokenString)
-                .orElseThrow(() -> new InvalidTokenException("Invalid reset token"));
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid reset token"));
 
         if (resetToken.getType() != PASSWORD_RESET ||
                 resetToken.getExpiresAt().isBefore(LocalDateTime.now()) ||
