@@ -84,10 +84,15 @@ public class AzureStorageService {
                 .setReadPermission(true);
 
         BlobServiceSasSignatureValues values = new BlobServiceSasSignatureValues(expiryTime, permission)
-                .setProtocol(HTTPS_ONLY);
+                .setProtocol(HTTPS_ONLY)
+                .setContentDisposition("attachment; filename=" + extractFilename(blobName)); // Extracts original filename
 
         String sasToken = blobClient.generateSas(values);
         return blobClient.getBlobUrl() + "?" + sasToken;
+    }
+
+    private String extractFilename(String blobName) {
+        return blobName.substring(blobName.lastIndexOf("/") + 1);
     }
 
     private void validateFile(MultipartFile file, long maxSize, List<String> allowedTypes) {

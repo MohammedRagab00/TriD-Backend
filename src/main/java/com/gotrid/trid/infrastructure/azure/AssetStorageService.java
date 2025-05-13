@@ -22,28 +22,28 @@ public abstract class AssetStorageService {
                                 MultipartFile iconFile, MultipartFile textureFile) {
 
         if (gltfFile != null && !gltfFile.isEmpty()) {
-            String gltfFilename = "gltfFile" + azureStorageService.getFileExtension(gltfFile);
+            String gltfFilename = gltfFile.getOriginalFilename();
             modelAsset.setGltf(
                     azureStorageService.uploadFile(gltfFile, containerName, basePath + gltfFilename, MAX_SIZE, List.of("model/gltf+json"))
             );
         }
 
         if (binFile != null && !binFile.isEmpty()) {
-            String binFilename = "binFile" + azureStorageService.getFileExtension(binFile);
+            String binFilename = binFile.getOriginalFilename();
             modelAsset.setBin(
                     azureStorageService.uploadFile(binFile, containerName, basePath + binFilename, MAX_SIZE, List.of("application/octet-stream"))
             );
         }
 
         if (iconFile != null && !iconFile.isEmpty()) {
-            String iconFilename = "iconFile" + azureStorageService.getFileExtension(iconFile);
+            String iconFilename = iconFile.getOriginalFilename();
             modelAsset.setIcon(
                     azureStorageService.uploadFile(iconFile, containerName, basePath + iconFilename, MAX_SIZE, ALLOWED_TYPES)
             );
         }
 
         if (textureFile != null && !textureFile.isEmpty()) {
-            String textureFilename = "textureFile" + azureStorageService.getFileExtension(textureFile);
+            String textureFilename = textureFile.getOriginalFilename();
             modelAsset.setTexture(
                     azureStorageService.uploadFile(textureFile, containerName, basePath + textureFilename, MAX_SIZE, ALLOWED_TYPES)
             );
