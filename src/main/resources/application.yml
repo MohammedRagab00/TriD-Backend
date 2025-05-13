@@ -15,6 +15,7 @@ spring:
   servlet:
     multipart:
       max-file-size: 300MB
+      max-request-size: 300MB
   flyway:
     enabled: true
     user: ${POSTGRES_USER}
