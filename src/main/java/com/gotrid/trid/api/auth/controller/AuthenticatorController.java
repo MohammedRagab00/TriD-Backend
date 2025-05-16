@@ -5,9 +5,9 @@ import com.gotrid.trid.api.auth.dto.AuthenticationResponse;
 import com.gotrid.trid.api.auth.dto.RefreshTokenRequest;
 import com.gotrid.trid.api.auth.dto.RegistrationRequest;
 import com.gotrid.trid.api.auth.service.AuthenticationService;
+import com.gotrid.trid.common.exception.handler.ExceptionResponse;
 import com.gotrid.trid.infrastructure.email.dto.ForgotPasswordRequest;
 import com.gotrid.trid.infrastructure.email.dto.ResetPasswordRequest;
-import com.gotrid.trid.common.exception.handler.ExceptionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -165,7 +165,7 @@ public class AuthenticatorController {
             @ApiResponse(responseCode = "200", description = "Password reset successful"),
             @ApiResponse(responseCode = "400", description = "Invalid or expired token")
     })
-    @PatchMapping("/reset-password")
+    @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(
             @RequestParam("token") String token,
             @RequestBody @Valid ResetPasswordRequest request
