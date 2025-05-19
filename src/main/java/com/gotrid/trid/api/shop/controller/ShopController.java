@@ -1,7 +1,7 @@
 package com.gotrid.trid.api.shop.controller;
 
 import com.gotrid.trid.api.shop.dto.CoordinateDTO;
-import com.gotrid.trid.api.shop.dto.ModelAssetsDTO;
+import com.gotrid.trid.api.shop.dto.ModelDTO;
 import com.gotrid.trid.api.shop.dto.SocialDTO;
 import com.gotrid.trid.api.shop.dto.shop.ShopRequest;
 import com.gotrid.trid.api.shop.dto.shop.ShopResponse;
@@ -69,22 +69,19 @@ public class ShopController {
         return ResponseEntity.accepted().build();
     }
 
-    @Operation(summary = "Upload shop assets", description = "Uploads 3D model files and related assets for a shop")
+    @Operation(summary = "Upload shop model", description = "Uploads 3D model file for a shop")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Assets uploaded successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid files"),
+            @ApiResponse(responseCode = "200", description = "Model uploaded successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid file"),
             @ApiResponse(responseCode = "403", description = "Not authorized")
     })
-    @PutMapping(value = "/{shopId}/upload-assets", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{shopId}/model", consumes = MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<Void> uploadShopFiles(
             @Parameter(description = "ID of the shop") @PathVariable Integer shopId,
-            @Parameter(description = "GLTF model file") @RequestParam("gltf") MultipartFile gltfFile,
-            @Parameter(description = "Binary data file") @RequestParam("bin") MultipartFile binFile,
-            @Parameter(description = "Shop icon file") @RequestParam(value = "icon", required = false) MultipartFile iconFile,
-            @Parameter(description = "Texture file") @RequestParam(value = "texture", required = false) MultipartFile textureFile,
+            @Parameter(description = "GLB model file") @RequestParam("glb") MultipartFile glbFile,
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
-        shopStorageService.uploadShopAssets(principal.user().getId(), shopId, gltfFile, binFile, iconFile, textureFile);
+        shopStorageService.uploadShopAssets(principal.user().getId(), shopId, glbFile);
         return ResponseEntity.ok().build();
     }
 
@@ -111,9 +108,9 @@ public class ShopController {
     })
     @GetMapping("/{shopId}/assets")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ModelAssetsDTO> getShopAssets(
+    public ResponseEntity<ModelDTO> getShopAssets(
             @Parameter(description = "ID of the shop") @PathVariable Integer shopId) {
-        return ResponseEntity.ok(shopService.getShopAssetDetails(shopId));
+        return ResponseEntity.ok(shopService.getShopModelDetails(shopId));
     }
 
     @Operation(summary = "Update shop social media", description = "Updates or adds social media links for a shop")

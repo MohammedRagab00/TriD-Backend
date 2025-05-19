@@ -2,22 +2,18 @@ package com.gotrid.trid.api.shop.service;
 
 import com.gotrid.trid.common.exception.custom.shop.ShopException;
 import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
+import com.gotrid.trid.core.shop.model.*;
 import com.gotrid.trid.infrastructure.azure.ShopStorageService;
 import com.gotrid.trid.common.response.PageResponse;
-import com.gotrid.trid.core.shop.model.Shop;
-import com.gotrid.trid.core.shop.model.Product;
-import com.gotrid.trid.api.shop.dto.AssetUrlsDTO;
 import com.gotrid.trid.api.shop.dto.CoordinateDTO;
-import com.gotrid.trid.api.shop.dto.ModelAssetsDTO;
+import com.gotrid.trid.api.shop.dto.ModelDTO;
 import com.gotrid.trid.api.shop.dto.SocialDTO;
 import com.gotrid.trid.api.shop.dto.shop.ShopRequest;
 import com.gotrid.trid.api.shop.dto.shop.ShopResponse;
 import com.gotrid.trid.core.shop.mapper.CoordinateMapper;
 import com.gotrid.trid.core.shop.mapper.ShopMapper;
 import com.gotrid.trid.core.shop.mapper.SocialMapper;
-import com.gotrid.trid.core.shop.model.Coordinates;
-import com.gotrid.trid.core.shop.model.ModelAsset;
-import com.gotrid.trid.core.shop.model.Social;
+import com.gotrid.trid.core.shop.model.Model;
 import com.gotrid.trid.core.shop.repository.ShopRepository;
 import com.gotrid.trid.core.user.model.Users;
 import com.gotrid.trid.core.user.repository.UserRepository;
@@ -100,20 +96,20 @@ public class ShopService extends BaseModelService {
         Shop shop = findShopById(shopId);
         validateOwnership(ownerId, shop.getOwner().getId(), "You are not authorized to update this shop");
 
-        ModelAsset modelAsset = getOrCreateModelAsset(shop.getModelAsset());
-        Coordinates updatedCoordinates = getOrCreateCoordinates(modelAsset);
+        Model model = getOrCreateModelAsset(shop.getModel());
+        Coordinates updatedCoordinates = getOrCreateCoordinates(model);
 
         updateCoordinates(updatedCoordinates, coordinates);
-        modelAsset.setCoordinates(updatedCoordinates);
-        shop.setModelAsset(modelAsset);
+        model.setCoordinates(updatedCoordinates);
+        shop.setModel(model);
 
         shopRepository.save(shop);
     }
 
-    public ModelAssetsDTO getShopAssetDetails(Integer shopId) {
+    public ModelDTO getShopModelDetails(Integer shopId) {
         Shop shop = findShopById(shopId);
-        AssetUrlsDTO urls = shopStorageService.getShopAssetUrls(shopId);
-        return createAssetDetails(shop.getModelAsset(), urls);
+        String glbUrl = shopStorageService.getShopModelUrl(shopId);
+        return createModelDetails(shop.getModel(), glbUrl);
     }
 
     @Transactional

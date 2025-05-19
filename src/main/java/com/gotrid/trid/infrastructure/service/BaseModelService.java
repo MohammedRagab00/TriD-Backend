@@ -1,12 +1,11 @@
 package com.gotrid.trid.infrastructure.service;
 
 import com.gotrid.trid.common.exception.custom.UnAuthorizedException;
-import com.gotrid.trid.api.shop.dto.AssetUrlsDTO;
 import com.gotrid.trid.api.shop.dto.CoordinateDTO;
-import com.gotrid.trid.api.shop.dto.ModelAssetsDTO;
+import com.gotrid.trid.api.shop.dto.ModelDTO;
 import com.gotrid.trid.core.shop.mapper.CoordinateMapper;
 import com.gotrid.trid.core.shop.model.Coordinates;
-import com.gotrid.trid.core.shop.model.ModelAsset;
+import com.gotrid.trid.core.shop.model.Model;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,18 +27,18 @@ public abstract class BaseModelService {
         coordinates.setZ_rot(dto.z_rot());
     }
 
-    protected ModelAsset getOrCreateModelAsset(ModelAsset existing) {
-        return existing != null ? existing : new ModelAsset();
+    protected Model getOrCreateModelAsset(Model existing) {
+        return existing != null ? existing : new Model();
     }
 
-    protected Coordinates getOrCreateCoordinates(ModelAsset modelAsset) {
-        return modelAsset.getCoordinates() != null ? modelAsset.getCoordinates() : new Coordinates();
+    protected Coordinates getOrCreateCoordinates(Model model) {
+        return model.getCoordinates() != null ? model.getCoordinates() : new Coordinates();
     }
 
-    protected ModelAssetsDTO createAssetDetails(ModelAsset modelAsset, AssetUrlsDTO urls) {
-        CoordinateDTO coordinates = modelAsset != null && modelAsset.getCoordinates() != null ?
-                coordinateMapper.toDTO(modelAsset.getCoordinates()) : null;
-        return new ModelAssetsDTO(urls, coordinates);
+    protected ModelDTO createModelDetails(Model model, String glbUrl) {
+        CoordinateDTO coordinates = model != null && model.getCoordinates() != null ?
+                coordinateMapper.toDTO(model.getCoordinates()) : null;
+        return new ModelDTO(glbUrl, coordinates);
     }
 
     protected void validateOwnership(Integer ownerId, Integer actualOwnerId, String message) {

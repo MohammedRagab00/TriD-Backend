@@ -1,28 +1,23 @@
 package com.gotrid.trid.api.shop.service;
 
-import com.gotrid.trid.common.exception.custom.product.DuplicateResourceException;
-import com.gotrid.trid.common.exception.custom.product.ProductNotFoundException;
-import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
-import com.gotrid.trid.infrastructure.azure.ProductStorageService;
-import com.gotrid.trid.common.response.PageResponse;
-import com.gotrid.trid.core.shop.model.Shop;
-import com.gotrid.trid.core.shop.model.Product;
-import com.gotrid.trid.core.shop.model.ProductVariant;
-import com.gotrid.trid.api.shop.dto.AssetUrlsDTO;
 import com.gotrid.trid.api.shop.dto.CoordinateDTO;
-import com.gotrid.trid.api.shop.dto.ModelAssetsDTO;
+import com.gotrid.trid.api.shop.dto.ModelDTO;
 import com.gotrid.trid.api.shop.dto.product.ProductRequest;
 import com.gotrid.trid.api.shop.dto.product.ProductResponse;
 import com.gotrid.trid.api.shop.dto.product.ProductVariantRequest;
 import com.gotrid.trid.api.shop.dto.product.ProductVariantResponse;
+import com.gotrid.trid.common.exception.custom.product.DuplicateResourceException;
+import com.gotrid.trid.common.exception.custom.product.ProductNotFoundException;
+import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
+import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.core.shop.mapper.CoordinateMapper;
 import com.gotrid.trid.core.shop.mapper.ProductMapper;
 import com.gotrid.trid.core.shop.mapper.ProductVariantMapper;
-import com.gotrid.trid.core.shop.model.Coordinates;
-import com.gotrid.trid.core.shop.model.ModelAsset;
+import com.gotrid.trid.core.shop.model.*;
 import com.gotrid.trid.core.shop.repository.ProductRepository;
 import com.gotrid.trid.core.shop.repository.ProductVariantRepository;
 import com.gotrid.trid.core.shop.repository.ShopRepository;
+import com.gotrid.trid.infrastructure.azure.ProductStorageService;
 import com.gotrid.trid.infrastructure.service.BaseModelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -82,20 +77,20 @@ public class ProductService extends BaseModelService {
         validateOwnership(ownerId, product.getShop().getOwner().getId(),
                 "Unauthorized: You don't own this shop to be able to add coordinates for this product");
 
-        ModelAsset modelAsset = getOrCreateModelAsset(product.getModelAsset());
-        Coordinates updatedCoordinates = getOrCreateCoordinates(modelAsset);
+        Model model = getOrCreateModelAsset(product.getModel());
+        Coordinates updatedCoordinates = getOrCreateCoordinates(model);
 
         updateCoordinates(updatedCoordinates, coordinates);
-        modelAsset.setCoordinates(updatedCoordinates);
-        product.setModelAsset(modelAsset);
+        model.setCoordinates(updatedCoordinates);
+        product.setModel(model);
 
         productRepository.save(product);
     }
 
-    public ModelAssetsDTO getProductAssetDetails(Integer productId) {
+    public ModelDTO getProductModelDetails(Integer productId) {
         Product product = findProductById(productId);
-        AssetUrlsDTO urls = productStorageService.getProductAssetUrls(productId);
-        return createAssetDetails(product.getModelAsset(), urls);
+        String glbUrl = productStorageService.getProductModelUrl(productId);
+        return createModelDetails(product.getModel(), glbUrl);
     }
 
     @Transactional(readOnly = true)
@@ -208,9 +203,8 @@ public class ProductService extends BaseModelService {
     }
 
     @Transactional
-    public void uploadProductAssets(Integer productId, Integer ownerId, MultipartFile gltfFile,
-                                    MultipartFile binFile, MultipartFile iconFile, MultipartFile textureFile) {
-        productStorageService.uploadProductAssets(productId, ownerId, gltfFile, binFile, iconFile, textureFile);
+    public void uploadProductAssets(Integer ownerId,Integer productId,  MultipartFile glbFile) {
+        productStorageService.uploadProductAssets(ownerId,productId,  glbFile);
     }
 
     private Product findProductById(Integer productId) {

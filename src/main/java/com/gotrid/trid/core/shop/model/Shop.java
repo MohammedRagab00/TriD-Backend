@@ -1,6 +1,7 @@
 package com.gotrid.trid.core.shop.model;
 
 import com.gotrid.trid.common.model.AuditableEntity;
+import com.gotrid.trid.core.photo.model.Photo;
 import com.gotrid.trid.core.user.model.Users;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -19,7 +20,7 @@ import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true, exclude = {"socials", "products", "modelAsset", "owner"})
+@EqualsAndHashCode(callSuper = true, exclude = {"socials", "products", "model", "owner", "photos"})
 @Entity
 public class Shop extends AuditableEntity {
 
@@ -44,7 +45,14 @@ public class Shop extends AuditableEntity {
     private Set<Social> socials = new HashSet<>();
 
     @OneToOne(cascade = CascadeType.ALL)
-    private ModelAsset modelAsset;
+    @JoinColumn(name = "model_asset_id")
+    private Model model;
+
+    @Column(length = 100)
+    private String logo;
+
+    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Photo> photos = new HashSet<>();
 
     @OneToMany(mappedBy = "shop")
     private Set<Product> products = new HashSet<>();

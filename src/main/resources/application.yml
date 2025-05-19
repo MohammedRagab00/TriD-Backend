@@ -46,7 +46,7 @@ application:
         expiration-days: ${EXPIRATION_DAYS}
   mailing:
     frontend:
-      url: http://localhost:4200
+      url: https://trid-frontend.vercel.app
 springdoc:
   default-produces-media-type: application/json
 server:

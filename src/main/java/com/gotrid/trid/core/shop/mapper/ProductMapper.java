@@ -11,7 +11,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
     @Mapping(target = "variants", ignore = true)
-    @Mapping(target = "modelAsset", ignore = true)
+    @Mapping(target = "model", ignore = true)
     @Mapping(target = "shop", ignore = true)
     Product toEntity(ProductRequest request);
 

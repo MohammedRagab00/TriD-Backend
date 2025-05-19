@@ -1,7 +1,7 @@
 package com.gotrid.trid.api.shop.controller;
 
 import com.gotrid.trid.api.shop.dto.CoordinateDTO;
-import com.gotrid.trid.api.shop.dto.ModelAssetsDTO;
+import com.gotrid.trid.api.shop.dto.ModelDTO;
 import com.gotrid.trid.api.shop.dto.product.ProductRequest;
 import com.gotrid.trid.api.shop.dto.product.ProductResponse;
 import com.gotrid.trid.api.shop.dto.product.ProductVariantRequest;
@@ -176,38 +176,35 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Upload product assets", description = "Uploads 3D model files and related assets for a product")
+    @Operation(summary = "Upload product model", description = "Uploads 3D model file for a product")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Assets uploaded successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid files"),
+            @ApiResponse(responseCode = "200", description = "Model uploaded successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid file"),
             @ApiResponse(responseCode = "403", description = "Not authorized")
     })
-    @PutMapping(value = "/{productId}/upload-assets", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{productId}/model", consumes = MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<Void> uploadProductFiles(
             @Parameter(description = "ID of the product") @PathVariable Integer productId,
-            @Parameter(description = "GLTF model file") @RequestParam("gltf") MultipartFile gltfFile,
-            @Parameter(description = "Binary data file") @RequestParam("bin") MultipartFile binFile,
-            @Parameter(description = "Product icon file") @RequestParam(value = "icon", required = false) MultipartFile iconFile,
-            @Parameter(description = "Texture file") @RequestParam(value = "texture", required = false) MultipartFile textureFile,
+            @Parameter(description = "GLB model file") @RequestParam("glb") MultipartFile glbFile,
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal
     ) {
         Integer ownerId = principal.user().getId();
-        productService.uploadProductAssets(productId, ownerId, gltfFile, binFile, iconFile, textureFile);
+        productService.uploadProductAssets(ownerId, productId, glbFile);
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Get product assets", description = "Retrieves URLs and details of product's 3D assets")
+    @Operation(summary = "Get product model", description = "Retrieves URL and coordinates of product's 3D model")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Assets retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
-    @GetMapping("/{productId}/assets")
+    @GetMapping("/{productId}/model")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ModelAssetsDTO> getProductAssets(
+    public ResponseEntity<ModelDTO> getProductAssets(
             @Parameter(description = "ID of the product") @PathVariable Integer productId
     ) {
-        return ResponseEntity.ok(productService.getProductAssetDetails(productId));
+        return ResponseEntity.ok(productService.getProductModelDetails(productId));
     }
 
     @Operation(summary = "Get product", description = "Retrieves details of a specific product")

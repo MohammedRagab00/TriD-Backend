@@ -2,9 +2,8 @@ package com.gotrid.trid.infrastructure.azure;
 
 import com.gotrid.trid.common.exception.custom.UnAuthorizedException;
 import com.gotrid.trid.common.exception.custom.product.ProductNotFoundException;
+import com.gotrid.trid.core.shop.model.Model;
 import com.gotrid.trid.core.shop.model.Product;
-import com.gotrid.trid.api.shop.dto.AssetUrlsDTO;
-import com.gotrid.trid.core.shop.model.ModelAsset;
 import com.gotrid.trid.core.shop.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +25,9 @@ public class ProductStorageService extends AssetStorageService {
         this.productRepository = productRepository;
     }
 
-    public void uploadProductAssets(Integer productId, Integer ownerId,
-                                    MultipartFile gltfFile, MultipartFile binFile,
-                                    MultipartFile iconFile, MultipartFile textureFile) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+    public void uploadProductAssets(Integer ownerId, Integer productId,
+                                    MultipartFile glbFile) {
+        Product product = findProductById(productId);
 
         if (!product.getShop().getOwner().getId().equals(ownerId)) {
             throw new UnAuthorizedException(
@@ -38,24 +35,27 @@ public class ProductStorageService extends AssetStorageService {
             );
         }
 
-        if (product.getModelAsset() == null) {
-            product.setModelAsset(new ModelAsset());
+        if (product.getModel() == null) {
+            product.setModel(new Model());
         }
 
         String basePath = product.getShop().getId() + "/" + productId + "/";
-        uploadAssets(product.getModelAsset(), CONTAINER_NAME, basePath, gltfFile, binFile, iconFile, textureFile);
+        uploadAssets(product.getModel(), CONTAINER_NAME, basePath, glbFile);
         productRepository.save(product);
     }
 
-    public AssetUrlsDTO getProductAssetUrls(Integer productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
-        return getAssetUrls(product.getModelAsset(), CONTAINER_NAME);
+    public String getProductModelUrl(Integer productId) {
+        Product product = findProductById(productId);
+        return getModelUrl(product.getModel(), CONTAINER_NAME);
     }
 
     public void deleteProductAssets(Integer productId) {
-        Product product = productRepository.findById(productId)
+        Product product = findProductById(productId);
+        deleteAssets(product.getModel(), CONTAINER_NAME);
+    }
+
+    private Product findProductById(Integer productId) {
+        return productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
-        deleteAssets(product.getModelAsset(), CONTAINER_NAME);
     }
 }

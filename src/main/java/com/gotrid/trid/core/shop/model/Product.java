@@ -14,7 +14,7 @@ import java.util.List;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true, exclude = {"variants", "shop", "modelAsset"})
+@EqualsAndHashCode(callSuper = true, exclude = {"variants", "shop", "model"})
 @Entity
 public class Product extends AuditableEntity {
 
@@ -33,7 +33,8 @@ public class Product extends AuditableEntity {
     private List<ProductVariant> variants = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL)
-    private ModelAsset modelAsset;
+    @JoinColumn(name = "model_asset_id")
+    private Model model;
 
     @ManyToOne
     private Shop shop;

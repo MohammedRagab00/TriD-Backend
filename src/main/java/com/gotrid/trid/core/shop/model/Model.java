@@ -4,6 +4,7 @@ import com.gotrid.trid.common.model.AuditableEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,12 +17,10 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Entity
-public class ModelAsset extends AuditableEntity {
+@Table(name = "model_asset")
+public class Model extends AuditableEntity {
 
-    private String gltf;
-    private String bin;
-    private String icon;
-    private String texture;
+    private String glb;
 
     @OneToOne(cascade = CascadeType.ALL)
     private Coordinates coordinates;

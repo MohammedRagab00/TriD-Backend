@@ -1,11 +1,9 @@
 package com.gotrid.trid.api.shop.dto.shop;
 
 import com.gotrid.trid.api.shop.dto.SocialDTO;
-import lombok.Builder;
 
 import java.util.List;
 
-@Builder
 public record ShopResponse(
         Integer id,
         String name,
@@ -14,6 +12,7 @@ public record ShopResponse(
         String description,
         String email,
         String phone,
-        List<SocialDTO> socials
+        List<SocialDTO> socials,
+        String logo
 ) {
 }

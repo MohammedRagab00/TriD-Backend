@@ -1,7 +1,8 @@
 package com.gotrid.trid.api.shop.dto;
 
-public record ModelAssetsDTO(
-        AssetUrlsDTO urls,
+public record ModelDTO(
+        String glbUrl,
+
         CoordinateDTO coordinates
 ) {
 }

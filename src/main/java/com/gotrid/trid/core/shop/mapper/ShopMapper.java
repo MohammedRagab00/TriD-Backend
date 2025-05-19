@@ -1,9 +1,9 @@
 package com.gotrid.trid.core.shop.mapper;
 
-import com.gotrid.trid.core.shop.model.Shop;
+import com.gotrid.trid.api.shop.dto.SocialDTO;
 import com.gotrid.trid.api.shop.dto.shop.ShopRequest;
 import com.gotrid.trid.api.shop.dto.shop.ShopResponse;
-import com.gotrid.trid.api.shop.dto.SocialDTO;
+import com.gotrid.trid.core.shop.model.Shop;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -27,16 +27,16 @@ public class ShopMapper {
                 .map(social -> new SocialDTO(social.getPlatform(), social.getLink()))
                 .collect(Collectors.toList());
 
-        return ShopResponse.builder()
-                .id(entity.getId())
-                .name(entity.getName())
-                .category(entity.getCategory())
-                .location(entity.getLocation())
-                .description(entity.getDescription())
-                .email(entity.getEmail())
-                .phone(entity.getPhone())
-                .socials(socials)
-                .build();
-
+        return new ShopResponse(
+                entity.getId(),
+                entity.getName(),
+                entity.getCategory(),
+                entity.getLocation(),
+                entity.getDescription(),
+                entity.getEmail(),
+                entity.getPhone(),
+                socials,
+                entity.getLogo()
+        );
     }
 }
