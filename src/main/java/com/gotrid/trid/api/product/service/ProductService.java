@@ -1,22 +1,26 @@
-package com.gotrid.trid.api.shop.service;
+package com.gotrid.trid.api.product.service;
 
-import com.gotrid.trid.api.shop.dto.CoordinateDTO;
-import com.gotrid.trid.api.shop.dto.ModelDTO;
-import com.gotrid.trid.api.shop.dto.product.ProductRequest;
-import com.gotrid.trid.api.shop.dto.product.ProductResponse;
-import com.gotrid.trid.api.shop.dto.product.ProductVariantRequest;
-import com.gotrid.trid.api.shop.dto.product.ProductVariantResponse;
+import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
+import com.gotrid.trid.core.threedModel.dto.ModelDTO;
+import com.gotrid.trid.api.product.dto.ProductRequest;
+import com.gotrid.trid.api.product.dto.ProductResponse;
+import com.gotrid.trid.api.product.dto.ProductVariantRequest;
+import com.gotrid.trid.api.product.dto.ProductVariantResponse;
 import com.gotrid.trid.common.exception.custom.product.DuplicateResourceException;
 import com.gotrid.trid.common.exception.custom.product.ProductNotFoundException;
 import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.common.response.PageResponse;
-import com.gotrid.trid.core.shop.mapper.CoordinateMapper;
-import com.gotrid.trid.core.shop.mapper.ProductMapper;
-import com.gotrid.trid.core.shop.mapper.ProductVariantMapper;
+import com.gotrid.trid.core.product.model.Product;
+import com.gotrid.trid.core.product.model.ProductVariant;
+import com.gotrid.trid.core.threedModel.mapper.CoordinateMapper;
+import com.gotrid.trid.core.product.mapper.ProductMapper;
+import com.gotrid.trid.core.product.mapper.ProductVariantMapper;
 import com.gotrid.trid.core.shop.model.*;
-import com.gotrid.trid.core.shop.repository.ProductRepository;
-import com.gotrid.trid.core.shop.repository.ProductVariantRepository;
+import com.gotrid.trid.core.product.repository.ProductRepository;
+import com.gotrid.trid.core.product.repository.ProductVariantRepository;
 import com.gotrid.trid.core.shop.repository.ShopRepository;
+import com.gotrid.trid.core.threedModel.model.Coordinates;
+import com.gotrid.trid.core.threedModel.model.Model;
 import com.gotrid.trid.infrastructure.azure.ProductStorageService;
 import com.gotrid.trid.infrastructure.service.BaseModelService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,8 +166,6 @@ public class ProductService extends BaseModelService {
                 "Unauthorized: You don't own this product to be able to add variants to it");
 
         product.setName(request.name());
-        product.setSizes(request.sizes());
-        product.setColors(request.colors());
         product.setDescription(request.description());
         product.setBasePrice(request.basePrice());
 

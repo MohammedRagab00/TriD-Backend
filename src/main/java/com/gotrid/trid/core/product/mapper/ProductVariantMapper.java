@@ -1,8 +1,8 @@
-package com.gotrid.trid.core.shop.mapper;
+package com.gotrid.trid.core.product.mapper;
 
-import com.gotrid.trid.core.shop.model.ProductVariant;
-import com.gotrid.trid.api.shop.dto.product.ProductVariantRequest;
-import com.gotrid.trid.api.shop.dto.product.ProductVariantResponse;
+import com.gotrid.trid.core.product.model.ProductVariant;
+import com.gotrid.trid.api.product.dto.ProductVariantRequest;
+import com.gotrid.trid.api.product.dto.ProductVariantResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

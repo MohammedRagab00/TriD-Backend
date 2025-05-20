@@ -2,6 +2,8 @@ package com.gotrid.trid.core.shop.model;
 
 import com.gotrid.trid.common.model.AuditableEntity;
 import com.gotrid.trid.core.photo.model.Photo;
+import com.gotrid.trid.core.product.model.Product;
+import com.gotrid.trid.core.threedModel.model.Model;
 import com.gotrid.trid.core.user.model.Users;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;

@@ -1,4 +1,4 @@
-package com.gotrid.trid.core.shop.model;
+package com.gotrid.trid.core.threedModel.model;
 
 import com.gotrid.trid.common.model.AuditableEntity;
 import jakarta.persistence.CascadeType;

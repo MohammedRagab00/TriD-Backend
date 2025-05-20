@@ -1,8 +1,8 @@
-package com.gotrid.trid.core.shop.mapper;
+package com.gotrid.trid.core.product.mapper;
 
-import com.gotrid.trid.core.shop.model.Product;
-import com.gotrid.trid.api.shop.dto.product.ProductRequest;
-import com.gotrid.trid.api.shop.dto.product.ProductResponse;
+import com.gotrid.trid.api.product.dto.ProductRequest;
+import com.gotrid.trid.api.product.dto.ProductResponse;
+import com.gotrid.trid.core.product.model.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

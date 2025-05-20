@@ -1,7 +1,7 @@
-package com.gotrid.trid.core.shop.repository;
+package com.gotrid.trid.core.product.repository;
 
 
-import com.gotrid.trid.core.shop.model.Product;
+import com.gotrid.trid.core.product.model.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

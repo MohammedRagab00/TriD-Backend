@@ -1,4 +1,4 @@
-package com.gotrid.trid.core.shop.model;
+package com.gotrid.trid.core.product.model;
 
 import com.gotrid.trid.common.model.BaseEntity;
 import jakarta.persistence.*;

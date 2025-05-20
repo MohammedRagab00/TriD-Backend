@@ -1,6 +1,6 @@
-package com.gotrid.trid.api.shop.dto.shop;
+package com.gotrid.trid.api.shop.dto;
 
-import com.gotrid.trid.api.shop.dto.ModelDTO;
+import com.gotrid.trid.core.threedModel.dto.ModelDTO;
 
 import java.util.List;
 

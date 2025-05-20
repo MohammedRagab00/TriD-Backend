@@ -1,4 +1,4 @@
-package com.gotrid.trid.api.shop.dto.product;
+package com.gotrid.trid.api.product.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -9,11 +9,11 @@ import java.math.BigDecimal;
 
 public record ProductVariantRequest(
         @NotBlank(message = "Color is required")
-        @Size(min = 3, max = 50, message = "Color must be between 3 and 50 characters")
+        @Size(min = 3, max = 50, message = "length of color must be between 3 and 50 characters")
         String color,
 
         @NotBlank(message = "Size is required")
-        @Size(min = 3, max = 20, message = "Size must be between 3 and 20 characters")
+        @Size(min = 1, max = 20, message = "length of size must be between 1 and 20 characters")
         String size,
 
         @PositiveOrZero(message = "Stock must be greater or equal to zero")

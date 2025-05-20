@@ -1,4 +1,4 @@
-package com.gotrid.trid.api.shop.dto;
+package com.gotrid.trid.core.threedModel.dto;
 
 public record CoordinateDTO(
         double x_pos,

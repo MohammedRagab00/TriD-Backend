@@ -1,4 +1,4 @@
-package com.gotrid.trid.api.shop.dto.shop;
+package com.gotrid.trid.api.shop.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

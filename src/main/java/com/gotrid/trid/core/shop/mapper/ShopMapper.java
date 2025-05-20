@@ -1,8 +1,8 @@
 package com.gotrid.trid.core.shop.mapper;
 
 import com.gotrid.trid.api.shop.dto.SocialDTO;
-import com.gotrid.trid.api.shop.dto.shop.ShopRequest;
-import com.gotrid.trid.api.shop.dto.shop.ShopResponse;
+import com.gotrid.trid.api.shop.dto.ShopRequest;
+import com.gotrid.trid.api.shop.dto.ShopResponse;
 import com.gotrid.trid.core.shop.model.Shop;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,4 @@
-package com.gotrid.trid.api.shop.dto.shop;
-
-import com.gotrid.trid.api.shop.dto.SocialDTO;
+package com.gotrid.trid.api.shop.dto;
 
 import java.util.List;
 
