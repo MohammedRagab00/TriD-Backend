@@ -1,11 +1,11 @@
 package com.gotrid.trid.api.shop.controller;
 
-import com.gotrid.trid.api.shop.dto.CoordinateDTO;
+import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
 import com.gotrid.trid.api.shop.dto.SocialDTO;
-import com.gotrid.trid.api.shop.dto.shop.ShopModelResponse;
-import com.gotrid.trid.api.shop.dto.shop.ShopRequest;
-import com.gotrid.trid.api.shop.dto.shop.ShopResponse;
-import com.gotrid.trid.api.shop.dto.shop.ShopUpdateRequest;
+import com.gotrid.trid.api.shop.dto.ShopModelResponse;
+import com.gotrid.trid.api.shop.dto.ShopRequest;
+import com.gotrid.trid.api.shop.dto.ShopResponse;
+import com.gotrid.trid.api.shop.dto.ShopUpdateRequest;
 import com.gotrid.trid.api.shop.service.ShopService;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.config.security.userdetails.UserPrincipal;

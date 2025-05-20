@@ -2,7 +2,7 @@ package com.gotrid.trid.infrastructure.azure;
 
 import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.core.photo.model.Photo;
-import com.gotrid.trid.core.shop.model.Model;
+import com.gotrid.trid.core.threedModel.model.Model;
 import com.gotrid.trid.core.shop.model.Shop;
 import com.gotrid.trid.core.shop.repository.ShopRepository;
 import lombok.extern.slf4j.Slf4j;

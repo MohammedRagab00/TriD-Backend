@@ -1,12 +1,12 @@
-package com.gotrid.trid.api.shop.controller;
+package com.gotrid.trid.api.product.controller;
 
-import com.gotrid.trid.api.shop.dto.CoordinateDTO;
-import com.gotrid.trid.api.shop.dto.ModelDTO;
-import com.gotrid.trid.api.shop.dto.product.ProductRequest;
-import com.gotrid.trid.api.shop.dto.product.ProductResponse;
-import com.gotrid.trid.api.shop.dto.product.ProductVariantRequest;
-import com.gotrid.trid.api.shop.dto.product.ProductVariantResponse;
-import com.gotrid.trid.api.shop.service.ProductService;
+import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
+import com.gotrid.trid.core.threedModel.dto.ModelDTO;
+import com.gotrid.trid.api.product.dto.ProductRequest;
+import com.gotrid.trid.api.product.dto.ProductResponse;
+import com.gotrid.trid.api.product.dto.ProductVariantRequest;
+import com.gotrid.trid.api.product.dto.ProductVariantResponse;
+import com.gotrid.trid.api.product.service.ProductService;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.config.security.userdetails.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;

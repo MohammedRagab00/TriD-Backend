@@ -1,7 +1,7 @@
-package com.gotrid.trid.core.shop.mapper;
+package com.gotrid.trid.core.threedModel.mapper;
 
-import com.gotrid.trid.api.shop.dto.CoordinateDTO;
-import com.gotrid.trid.core.shop.model.Coordinates;
+import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
+import com.gotrid.trid.core.threedModel.model.Coordinates;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,4 +1,4 @@
-package com.gotrid.trid.api.shop.dto.product;
+package com.gotrid.trid.api.product.dto;
 
 import java.math.BigDecimal;
 

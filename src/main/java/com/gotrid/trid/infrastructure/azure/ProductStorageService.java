@@ -1,9 +1,9 @@
 package com.gotrid.trid.infrastructure.azure;
 
 import com.gotrid.trid.common.exception.custom.product.ProductNotFoundException;
-import com.gotrid.trid.core.shop.model.Model;
-import com.gotrid.trid.core.shop.model.Product;
-import com.gotrid.trid.core.shop.repository.ProductRepository;
+import com.gotrid.trid.core.threedModel.model.Model;
+import com.gotrid.trid.core.product.model.Product;
+import com.gotrid.trid.core.product.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

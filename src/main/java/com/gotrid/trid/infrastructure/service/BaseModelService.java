@@ -1,11 +1,11 @@
 package com.gotrid.trid.infrastructure.service;
 
 import com.gotrid.trid.common.exception.custom.UnAuthorizedException;
-import com.gotrid.trid.api.shop.dto.CoordinateDTO;
-import com.gotrid.trid.api.shop.dto.ModelDTO;
-import com.gotrid.trid.core.shop.mapper.CoordinateMapper;
-import com.gotrid.trid.core.shop.model.Coordinates;
-import com.gotrid.trid.core.shop.model.Model;
+import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
+import com.gotrid.trid.core.threedModel.dto.ModelDTO;
+import com.gotrid.trid.core.threedModel.mapper.CoordinateMapper;
+import com.gotrid.trid.core.threedModel.model.Coordinates;
+import com.gotrid.trid.core.threedModel.model.Model;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
