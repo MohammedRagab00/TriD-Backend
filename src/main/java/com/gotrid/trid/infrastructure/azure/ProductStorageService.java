@@ -1,6 +1,5 @@
 package com.gotrid.trid.infrastructure.azure;
 
-import com.gotrid.trid.common.exception.custom.UnAuthorizedException;
 import com.gotrid.trid.common.exception.custom.product.ProductNotFoundException;
 import com.gotrid.trid.core.shop.model.Model;
 import com.gotrid.trid.core.shop.model.Product;
@@ -29,29 +28,31 @@ public class ProductStorageService extends AssetStorageService {
                                     MultipartFile glbFile) {
         Product product = findProductById(productId);
 
-        if (!product.getShop().getOwner().getId().equals(ownerId)) {
-            throw new UnAuthorizedException(
-                    "Unauthorized: You don't own this product to be able to upload assets for it."
-            );
-        }
+        validateOwnership(ownerId, product.getShop().getOwner().getId());
 
         if (product.getModel() == null) {
             product.setModel(new Model());
         }
 
         String basePath = product.getShop().getId() + "/" + productId + "/";
-        uploadAssets(product.getModel(), CONTAINER_NAME, basePath, glbFile);
+        product.getModel().setGlb(uploadGlbModel(CONTAINER_NAME, basePath, glbFile));
         productRepository.save(product);
     }
 
     public String getProductModelUrl(Integer productId) {
         Product product = findProductById(productId);
-        return getModelUrl(product.getModel(), CONTAINER_NAME);
+        if (product.getModel() == null) {
+            return null;
+        }
+        return getAssetUrl(CONTAINER_NAME, product.getModel().getGlb());
     }
 
     public void deleteProductAssets(Integer productId) {
         Product product = findProductById(productId);
-        deleteAssets(product.getModel(), CONTAINER_NAME);
+        if (product.getModel() == null) {
+            return;
+        }
+        deleteAsset(product.getModel().getGlb(), CONTAINER_NAME);
     }
 
     private Product findProductById(Integer productId) {

@@ -1,6 +1,6 @@
 package com.gotrid.trid.infrastructure.azure;
 
-import com.gotrid.trid.core.shop.model.Model;
+import com.gotrid.trid.common.exception.custom.UnAuthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,29 +14,29 @@ public abstract class AssetStorageService {
     protected final AzureStorageService azureStorageService;
     protected static final long MAX_SIZE = 300 * 1024 * 1024;
 
-    protected void uploadAssets(Model model, String containerName, String basePath,
-                                MultipartFile glbFile) {
+    protected String uploadGlbModel(String containerName, String basePath,
+                                    MultipartFile glbFile) {
 
         if (glbFile != null && !glbFile.isEmpty()) {
-            String gltfFilename = glbFile.getOriginalFilename();
-            model.setGlb(
-                    azureStorageService.uploadFile(glbFile, containerName, basePath + gltfFilename, MAX_SIZE, List.of("model/gltf-binary"))
-            );
+            String gltfFilename = "glbFile" + azureStorageService.getFileExtension(glbFile);
+            return azureStorageService.uploadFile(glbFile, containerName, basePath + gltfFilename, MAX_SIZE, List.of("model/gltf-binary"));
+        }
+        return null;
+    }
+
+    protected void deleteAsset(String assetUrl, String containerName) {
+        if (assetUrl != null) {
+            azureStorageService.deleteFile(assetUrl, containerName);
         }
     }
 
-    protected void deleteAssets(Model model, String containerName) {
-        if (model != null) {
-            if (model.getGlb() != null) {
-                azureStorageService.deleteFile(model.getGlb(), containerName);
-            }
-            //todo: delete other assets if needed (icon, texture for shop)
-        }
+    protected String getAssetUrl(String containerName, String assetUrl) {
+        return assetUrl != null ? azureStorageService.getBlobUrlWithSas(containerName, assetUrl) : null;
     }
 
-    protected String getModelUrl(Model model, String containerName) {
-        if (model == null) return null;
-
-        return model.getGlb() != null ? azureStorageService.getBlobUrlWithSas(containerName, model.getGlb()) : null;
+    protected void validateOwnership(Integer ownerId, Integer thingRealOwnerId) {
+        if (!ownerId.equals(thingRealOwnerId)) {
+            throw new UnAuthorizedException("Unauthorized: You don't own this");
+        }
     }
 }

@@ -1,10 +1,11 @@
 package com.gotrid.trid.api.shop.controller;
 
 import com.gotrid.trid.api.shop.dto.CoordinateDTO;
-import com.gotrid.trid.api.shop.dto.ModelDTO;
 import com.gotrid.trid.api.shop.dto.SocialDTO;
+import com.gotrid.trid.api.shop.dto.shop.ShopModelResponse;
 import com.gotrid.trid.api.shop.dto.shop.ShopRequest;
 import com.gotrid.trid.api.shop.dto.shop.ShopResponse;
+import com.gotrid.trid.api.shop.dto.shop.ShopUpdateRequest;
 import com.gotrid.trid.api.shop.service.ShopService;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.config.security.userdetails.UserPrincipal;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
+import java.util.List;
 
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -43,7 +45,7 @@ public class ShopController {
             @ApiResponse(responseCode = "400", description = "Invalid input"),
             @ApiResponse(responseCode = "403", description = "Not a seller")
     })
-    @PostMapping("/create")
+    @PostMapping
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<Integer> createShop(
             @RequestBody @Valid ShopRequest dto,
@@ -53,31 +55,31 @@ public class ShopController {
         return ResponseEntity.created(URI.create("/api/v1/shops/" + shopId)).body(shopId);
     }
 
-    @Operation(summary = "Update shop coordinates", description = "Updates the 3D coordinates of a shop")
+    @Operation(summary = "Upload/update shop logo", description = "Uploads or updates the shop logo")
     @ApiResponses({
-            @ApiResponse(responseCode = "202", description = "Coordinates updated successfully"),
-            @ApiResponse(responseCode = "403", description = "Not authorized"),
-            @ApiResponse(responseCode = "404", description = "Shop not found")
+            @ApiResponse(responseCode = "200", description = "Logo updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid file"),
+            @ApiResponse(responseCode = "403", description = "Not authorized")
     })
-    @PutMapping("/{shopId}/coordinates")
+    @PostMapping(value = "/{shopId}/logo", consumes = MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<Void> updateShopCoordinates(
+    public ResponseEntity<Void> uploadShopLogo(
             @Parameter(description = "ID of the shop") @PathVariable Integer shopId,
-            @RequestBody CoordinateDTO coordinates,
+            @Parameter(description = "Shop logo file") @RequestParam("logo") MultipartFile logoFile,
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
-        shopService.updateShopCoordinates(principal.user().getId(), shopId, coordinates);
-        return ResponseEntity.accepted().build();
+        shopStorageService.uploadShopLogo(principal.user().getId(), shopId, logoFile);
+        return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Upload shop model", description = "Uploads 3D model file for a shop")
+    @Operation(summary = "Upload shop model", description = "Uploads 3D GLB model file for a shop")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Model uploaded successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid file"),
             @ApiResponse(responseCode = "403", description = "Not authorized")
     })
-    @PutMapping(value = "/{shopId}/model", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/{shopId}/model", consumes = MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<Void> uploadShopFiles(
+    public ResponseEntity<Void> uploadShopModel(
             @Parameter(description = "ID of the shop") @PathVariable Integer shopId,
             @Parameter(description = "GLB model file") @RequestParam("glb") MultipartFile glbFile,
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
@@ -85,20 +87,77 @@ public class ShopController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Update shop details", description = "Updates the general information of a shop")
+    @Operation(summary = "Set shop coordinates", description = "Sets the 3D coordinates of a shop")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Coordinates set successfully"),
+            @ApiResponse(responseCode = "403", description = "Not authorized"),
+            @ApiResponse(responseCode = "404", description = "Shop not found")
+    })
+    @PutMapping("/{shopId}/coordinates")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<Void> setShopCoordinates(
+            @Parameter(description = "ID of the shop") @PathVariable Integer shopId,
+            @RequestBody CoordinateDTO coordinates,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
+        shopService.updateShopCoordinates(principal.user().getId(), shopId, coordinates);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Add shop photos", description = "Uploads one or multiple shop photos")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Photos added successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid files"),
+            @ApiResponse(responseCode = "403", description = "Not authorized")
+    })
+    @PostMapping(value = "/{shopId}/photos", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<Void> addShopPhotos(
+            @Parameter(description = "ID of the shop") @PathVariable Integer shopId,
+            @Parameter(description = "Shop photo files") @RequestParam("photos") List<MultipartFile> photoFiles,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
+        shopStorageService.uploadShopPhotos(principal.user().getId(), shopId, photoFiles);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Partially update shop details", description = "Accepts partial updates including logo, photos, and model asset")
     @ApiResponses({
             @ApiResponse(responseCode = "202", description = "Shop updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input"),
             @ApiResponse(responseCode = "403", description = "Not authorized")
     })
-    @PutMapping("/{shopId}/edit")
+    @PatchMapping(value = "/{shopId}", consumes = MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<Void> editShop(
+    public ResponseEntity<Void> patchShop(
             @Parameter(description = "ID of the shop") @PathVariable Integer shopId,
-            @RequestBody @Valid ShopRequest dto,
+            @ModelAttribute ShopUpdateRequest shopUpdateRequest,
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
-        shopService.updateShop(principal.user().getId(), shopId, dto);
+
+        shopService.patchShop(principal.user().getId(), shopId, shopUpdateRequest);
         return ResponseEntity.accepted().build();
+    }
+
+    @Operation(summary = "Get shop details", description = "Retrieves details of a specific shop")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Shop details retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Shop not found")
+    })
+    @GetMapping("/{shopId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ShopResponse> getShop(
+            @Parameter(description = "ID of the shop") @PathVariable Integer shopId) {
+        return ResponseEntity.ok(shopService.getShop(shopId));
+    }
+
+    @Operation(summary = "Get all shops", description = "Retrieves all shops with pagination")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Shops retrieved successfully")
+    })
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PageResponse<ShopResponse>> getAllShops(
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size) {
+        return ResponseEntity.ok(shopService.getAllShops(page, size));
     }
 
     @Operation(summary = "Get shop assets", description = "Retrieves URLs and details of shop's 3D assets")
@@ -108,7 +167,7 @@ public class ShopController {
     })
     @GetMapping("/{shopId}/assets")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ModelDTO> getShopAssets(
+    public ResponseEntity<ShopModelResponse> getShopAssets(
             @Parameter(description = "ID of the shop") @PathVariable Integer shopId) {
         return ResponseEntity.ok(shopService.getShopModelDetails(shopId));
     }
@@ -129,29 +188,6 @@ public class ShopController {
         return ResponseEntity.accepted().build();
     }
 
-    @Operation(summary = "Get all shops", description = "Retrieves all shops with pagination")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Shops retrieved successfully")
-    })
-    @GetMapping
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<PageResponse<ShopResponse>> getAllShops(
-            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
-            @RequestParam(name = "size", defaultValue = "10", required = false) int size) {
-        return ResponseEntity.ok(shopService.getAllShops(page, size));
-    }
-
-    @Operation(summary = "Get shop details", description = "Retrieves details of a specific shop")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Shop details retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "Shop not found")
-    })
-    @GetMapping("/{shopId}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ShopResponse> getShop(
-            @Parameter(description = "ID of the shop") @PathVariable Integer shopId) {
-        return ResponseEntity.ok(shopService.getShop(shopId));
-    }
 
     @Operation(summary = "Delete shop", description = "Deletes a shop and all its associated products and assets")
     @ApiResponses({

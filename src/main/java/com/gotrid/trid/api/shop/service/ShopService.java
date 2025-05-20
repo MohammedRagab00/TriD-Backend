@@ -1,22 +1,22 @@
 package com.gotrid.trid.api.shop.service;
 
-import com.gotrid.trid.common.exception.custom.shop.ShopException;
-import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
-import com.gotrid.trid.core.shop.model.*;
-import com.gotrid.trid.infrastructure.azure.ShopStorageService;
-import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.api.shop.dto.CoordinateDTO;
-import com.gotrid.trid.api.shop.dto.ModelDTO;
 import com.gotrid.trid.api.shop.dto.SocialDTO;
+import com.gotrid.trid.api.shop.dto.shop.ShopModelResponse;
 import com.gotrid.trid.api.shop.dto.shop.ShopRequest;
 import com.gotrid.trid.api.shop.dto.shop.ShopResponse;
+import com.gotrid.trid.api.shop.dto.shop.ShopUpdateRequest;
+import com.gotrid.trid.common.exception.custom.shop.ShopException;
+import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
+import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.core.shop.mapper.CoordinateMapper;
 import com.gotrid.trid.core.shop.mapper.ShopMapper;
 import com.gotrid.trid.core.shop.mapper.SocialMapper;
-import com.gotrid.trid.core.shop.model.Model;
+import com.gotrid.trid.core.shop.model.*;
 import com.gotrid.trid.core.shop.repository.ShopRepository;
 import com.gotrid.trid.core.user.model.Users;
 import com.gotrid.trid.core.user.repository.UserRepository;
+import com.gotrid.trid.infrastructure.azure.ShopStorageService;
 import com.gotrid.trid.infrastructure.service.BaseModelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -106,26 +106,53 @@ public class ShopService extends BaseModelService {
         shopRepository.save(shop);
     }
 
-    public ModelDTO getShopModelDetails(Integer shopId) {
+    @Transactional(readOnly = true)
+    public ShopModelResponse getShopModelDetails(Integer shopId) {
         Shop shop = findShopById(shopId);
+
         String glbUrl = shopStorageService.getShopModelUrl(shopId);
-        return createModelDetails(shop.getModel(), glbUrl);
+
+        List<String> imageUrls = shop.getPhotos().stream()
+                .map(photo -> shopStorageService.getPhotoUrl(photo.getUrl()))
+                .toList();
+
+        return new ShopModelResponse(createModelDetails(shop.getModel(), glbUrl), imageUrls);
     }
 
     @Transactional
-    public void updateShop(Integer ownerId, Integer shopId, ShopRequest dto) {
+    public void patchShop(Integer ownerId, Integer shopId, ShopUpdateRequest shopUpdateRequest) {
         Shop shop = findShopById(shopId);
-        validateOwnership(ownerId, shop.getOwner().getId(), "You are not authorized to update this shop");
-        validateShopName(shop, dto.name());
+        validateOwnership(ownerId, shop.getOwner().getId(), "Unauthorized: You don't own this shop");
 
-        updateShop(shop, dto);
+        if (shopUpdateRequest.getName() != null) {
+            validateShopName(shop, shopUpdateRequest.getName());
+            shop.setName(shopUpdateRequest.getName());
+        }
+        if (shopUpdateRequest.getCategory() != null) shop.setCategory(shopUpdateRequest.getCategory());
+        if (shopUpdateRequest.getLocation() != null) shop.setLocation(shopUpdateRequest.getLocation());
+        if (shopUpdateRequest.getDescription() != null) shop.setDescription(shopUpdateRequest.getDescription());
+        if (shopUpdateRequest.getEmail() != null) shop.setEmail(shopUpdateRequest.getEmail());
+        if (shopUpdateRequest.getPhone() != null) shop.setPhone(shopUpdateRequest.getPhone());
+
+        // Handle file uploads
+        if (shopUpdateRequest.getLogo() != null) {
+            shopStorageService.uploadShopLogo(ownerId, shopId, shopUpdateRequest.getLogo());
+        }
+        if (shopUpdateRequest.getGlb() != null) {
+            shopStorageService.uploadShopAssets(ownerId, shopId, shopUpdateRequest.getGlb());
+        }
+        if (shopUpdateRequest.getPhotos() != null && !shopUpdateRequest.getPhotos().isEmpty()) {
+            shopStorageService.uploadShopPhotos(ownerId, shopId, shopUpdateRequest.getPhotos());
+        }
+
         shopRepository.save(shop);
     }
 
     @Transactional(readOnly = true)
     public ShopResponse getShop(Integer shopId) {
         Shop shop = findShopById(shopId);
-        return shopMapper.toResponse(shop);
+        String logo = shopStorageService.getPhotoUrl(shop.getLogo());
+        return shopMapper.toResponse(shop, logo);
     }
 
     @Transactional(readOnly = true)
@@ -134,7 +161,7 @@ public class ShopService extends BaseModelService {
         Page<Shop> shopsPage = shopRepository.findAll(pageable);
 
         List<ShopResponse> shopResponses = shopsPage.stream()
-                .map(shopMapper::toResponse)
+                .map(shop -> shopMapper.toResponse(shop, shopStorageService.getPhotoUrl(shop.getLogo())))
                 .toList();
 
         return new PageResponse<>(
@@ -159,7 +186,7 @@ public class ShopService extends BaseModelService {
                 .collect(Collectors.toSet());
 
         productIds.forEach(productId -> productService.deleteProduct(productId, ownerId));
-        shopStorageService.deleteShopAssets(shopId);
+        shopStorageService.deleteShopAssets(shop);
         shopRepository.delete(shop);
     }
 
@@ -176,14 +203,5 @@ public class ShopService extends BaseModelService {
                     "Shop with name '" + newName + "' already exists"
             );
         }
-    }
-
-    private void updateShop(Shop shop, ShopRequest updateDTO) {
-        shop.setName(updateDTO.name());
-        shop.setCategory(updateDTO.category());
-        shop.setLocation(updateDTO.location());
-        shop.setDescription(updateDTO.description());
-        shop.setEmail(updateDTO.email());
-        shop.setPhone(updateDTO.phone());
     }
 }

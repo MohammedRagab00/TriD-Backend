@@ -203,15 +203,13 @@ public class ProductService extends BaseModelService {
     }
 
     @Transactional
-    public void uploadProductAssets(Integer ownerId,Integer productId,  MultipartFile glbFile) {
-        productStorageService.uploadProductAssets(ownerId,productId,  glbFile);
+    public void uploadProductAssets(Integer ownerId, Integer productId, MultipartFile glbFile) {
+        productStorageService.uploadProductAssets(ownerId, productId, glbFile);
     }
 
     private Product findProductById(Integer productId) {
         return productRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException(
-                        "Product not found with id: " + productId
-                ));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + productId));
     }
 
     private ProductVariant findVariantById(Integer variantId) {

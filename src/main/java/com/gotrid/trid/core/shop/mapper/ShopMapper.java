@@ -22,7 +22,7 @@ public class ShopMapper {
                 .build();
     }
 
-    public ShopResponse toResponse(Shop entity) {
+    public ShopResponse toResponse(Shop entity, String logo) {
         List<SocialDTO> socials = entity.getSocials().stream()
                 .map(social -> new SocialDTO(social.getPlatform(), social.getLink()))
                 .collect(Collectors.toList());
@@ -36,7 +36,7 @@ public class ShopMapper {
                 entity.getEmail(),
                 entity.getPhone(),
                 socials,
-                entity.getLogo()
+                logo
         );
     }
 }
