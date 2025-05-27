@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ShopRepository extends JpaRepository<Shop, Integer> {
     boolean existsByNameIgnoreCase(String name);
 
-    Page<Shop> findByOwnerId(Integer ownerId, Pageable pageable);
+    Page<Shop> findAllByOwnerId(Integer ownerId, Pageable pageable);
 }
