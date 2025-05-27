@@ -37,5 +37,5 @@ public class ShopUpdateRequest {
     private MultipartFile glb;
 
     @Schema(description = "Updated shop photos")
-    private List<MultipartFile> photos;
+    private List<MultipartFile> images;
 }

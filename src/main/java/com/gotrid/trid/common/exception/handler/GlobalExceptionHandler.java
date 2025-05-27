@@ -3,6 +3,7 @@ package com.gotrid.trid.common.exception.handler;
 import com.gotrid.trid.common.exception.custom.*;
 import com.gotrid.trid.common.exception.custom.product.DuplicateResourceException;
 import com.gotrid.trid.common.exception.custom.product.ProductNotFoundException;
+import com.gotrid.trid.common.exception.custom.shop.AlreadyHaveShopException;
 import com.gotrid.trid.common.exception.custom.shop.ShopException;
 import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.common.exception.custom.user.InvalidAgeException;
@@ -299,6 +300,18 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 null,
                 Map.of("refreshToken", "Invalid refresh token")
+        );
+    }
+
+    @ExceptionHandler(AlreadyHaveShopException.class)
+    public ResponseEntity<ExceptionResponse> handleAlreadyHaveShopException(AlreadyHaveShopException ex) {
+        log.warn("Shop creation error: {}", ex.getMessage());
+
+        return buildErrorResponse(
+                BusinessErrorCode.SHOP_ALREADY_EXISTS,
+                ex.getMessage(),
+                null,
+                Map.of("shop", "Only one shop per user is allowed")
         );
     }
 

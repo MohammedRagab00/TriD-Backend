@@ -2,6 +2,7 @@ package com.gotrid.trid.api.shop.service;
 
 import com.gotrid.trid.api.product.service.ProductService;
 import com.gotrid.trid.api.shop.dto.*;
+import com.gotrid.trid.common.exception.custom.shop.AlreadyHaveShopException;
 import com.gotrid.trid.common.exception.custom.shop.ShopException;
 import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.common.response.PageResponse;
@@ -68,6 +69,11 @@ public class ShopService extends BaseModelService {
             throw new ShopException(
                     SHOP_NAME_EXISTS,
                     "Shop with name '" + req.name() + "' already exists"
+            );
+        }
+        if (shopRepository.findAll().stream().anyMatch(shop -> shop.getOwner().getId().equals(ownerId))) {
+            throw new AlreadyHaveShopException(
+                    "You already has a shop. Only one shop per user is allowed."
             );
         }
 
@@ -144,8 +150,8 @@ public class ShopService extends BaseModelService {
         if (shopUpdateRequest.getGlb() != null) {
             shopStorageService.uploadShopAssets(ownerId, shopId, shopUpdateRequest.getGlb());
         }
-        if (shopUpdateRequest.getPhotos() != null && !shopUpdateRequest.getPhotos().isEmpty()) {
-            shopStorageService.uploadShopPhotos(ownerId, shopId, shopUpdateRequest.getPhotos());
+        if (shopUpdateRequest.getImages() != null && !shopUpdateRequest.getImages().isEmpty()) {
+            shopStorageService.uploadShopPhotos(ownerId, shopId, shopUpdateRequest.getImages());
         }
 
         shopRepository.save(shop);
