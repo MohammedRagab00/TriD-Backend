@@ -167,7 +167,7 @@ public class ShopService extends BaseModelService {
         assert user != null;
         Optional<String> roleSeller = user.getRoles().stream().map(Role::getName).filter(name -> name.equals("ROLE_SELLER")).findFirst();
         if (roleSeller.isPresent()) {
-            shopsPage = shopRepository.findByOwnerId(id, pageable);
+            shopsPage = shopRepository.findAllByOwnerId(id, pageable);
         } else {
             shopsPage = shopRepository.findAll(pageable);
         }
