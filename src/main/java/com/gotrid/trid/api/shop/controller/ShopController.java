@@ -156,8 +156,11 @@ public class ShopController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PageResponse<ShopResponse>> getAllShops(
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
-            @RequestParam(name = "size", defaultValue = "10", required = false) int size) {
-        return ResponseEntity.ok(shopService.getAllShops(page, size));
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        Integer mayBeOwnerId = principal.user().getId();
+        return ResponseEntity.ok(shopService.getAllShops(mayBeOwnerId,page, size));
     }
 
     @Operation(summary = "Get shop assets", description = "Retrieves URLs and details of shop's 3D assets")
