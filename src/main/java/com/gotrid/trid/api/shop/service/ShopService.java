@@ -1,23 +1,21 @@
 package com.gotrid.trid.api.shop.service;
 
 import com.gotrid.trid.api.product.service.ProductService;
-import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
-import com.gotrid.trid.api.shop.dto.SocialDTO;
-import com.gotrid.trid.api.shop.dto.ShopModelResponse;
-import com.gotrid.trid.api.shop.dto.ShopRequest;
-import com.gotrid.trid.api.shop.dto.ShopResponse;
-import com.gotrid.trid.api.shop.dto.ShopUpdateRequest;
+import com.gotrid.trid.api.shop.dto.*;
 import com.gotrid.trid.common.exception.custom.shop.ShopException;
 import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.core.product.model.Product;
-import com.gotrid.trid.core.threedModel.mapper.CoordinateMapper;
 import com.gotrid.trid.core.shop.mapper.ShopMapper;
 import com.gotrid.trid.core.shop.mapper.SocialMapper;
-import com.gotrid.trid.core.shop.model.*;
+import com.gotrid.trid.core.shop.model.Shop;
+import com.gotrid.trid.core.shop.model.Social;
 import com.gotrid.trid.core.shop.repository.ShopRepository;
+import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
+import com.gotrid.trid.core.threedModel.mapper.CoordinateMapper;
 import com.gotrid.trid.core.threedModel.model.Coordinates;
 import com.gotrid.trid.core.threedModel.model.Model;
+import com.gotrid.trid.core.user.model.Role;
 import com.gotrid.trid.core.user.model.Users;
 import com.gotrid.trid.core.user.repository.UserRepository;
 import com.gotrid.trid.infrastructure.azure.ShopStorageService;
@@ -32,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -160,9 +159,18 @@ public class ShopService extends BaseModelService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<ShopResponse> getAllShops(int page, int size) {
+    public PageResponse<ShopResponse> getAllShops(Integer id, int page, int size) {
+        Users user = userRepository.findById(id).orElse(null);
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
-        Page<Shop> shopsPage = shopRepository.findAll(pageable);
+        Page<Shop> shopsPage;
+
+        assert user != null;
+        Optional<String> roleSeller = user.getRoles().stream().map(Role::getName).filter(name -> name.equals("ROLE_SELLER")).findFirst();
+        if (roleSeller.isPresent()) {
+            shopsPage = shopRepository.findByOwnerId(id, pageable);
+        } else {
+            shopsPage = shopRepository.findAll(pageable);
+        }
 
         List<ShopResponse> shopResponses = shopsPage.stream()
                 .map(shop -> shopMapper.toResponse(shop, shopStorageService.getPhotoUrl(shop.getLogo())))
