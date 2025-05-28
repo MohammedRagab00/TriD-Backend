@@ -3,7 +3,7 @@ package com.gotrid.trid.common.exception.handler;
 import com.gotrid.trid.common.exception.custom.*;
 import com.gotrid.trid.common.exception.custom.product.DuplicateResourceException;
 import com.gotrid.trid.common.exception.custom.product.ProductNotFoundException;
-import com.gotrid.trid.common.exception.custom.shop.AlreadyHaveShopException;
+import com.gotrid.trid.common.exception.custom.shop.AlreadyOwnsShopException;
 import com.gotrid.trid.common.exception.custom.shop.ShopException;
 import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.common.exception.custom.user.InvalidAgeException;
@@ -303,8 +303,8 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(AlreadyHaveShopException.class)
-    public ResponseEntity<ExceptionResponse> handleAlreadyHaveShopException(AlreadyHaveShopException ex) {
+    @ExceptionHandler(AlreadyOwnsShopException.class)
+    public ResponseEntity<ExceptionResponse> handleAlreadyHaveShopException(AlreadyOwnsShopException ex) {
         log.warn("Shop creation error: {}", ex.getMessage());
 
         return buildErrorResponse(

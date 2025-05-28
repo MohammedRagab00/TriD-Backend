@@ -1,21 +1,22 @@
 package com.gotrid.trid.core.threedModel.model;
 
 import com.gotrid.trid.common.model.AuditableEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import com.gotrid.trid.core.photo.model.Photo;
+import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Getter
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"coordinates", "photos"})
 @Entity
 @Table(name = "model_asset")
 public class Model extends AuditableEntity {
@@ -24,4 +25,7 @@ public class Model extends AuditableEntity {
 
     @OneToOne(cascade = CascadeType.ALL)
     private Coordinates coordinates;
+
+    @OneToMany(mappedBy = "model", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Photo> photos = new HashSet<>();
 }
