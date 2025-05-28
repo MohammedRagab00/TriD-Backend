@@ -2,7 +2,7 @@ package com.gotrid.trid.api.shop.controller;
 
 import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
 import com.gotrid.trid.api.shop.dto.SocialDTO;
-import com.gotrid.trid.api.shop.dto.ShopModelResponse;
+import com.gotrid.trid.api.threedModel.dto.ModelResponse;
 import com.gotrid.trid.api.shop.dto.ShopRequest;
 import com.gotrid.trid.api.shop.dto.ShopResponse;
 import com.gotrid.trid.api.shop.dto.ShopUpdateRequest;
@@ -170,7 +170,7 @@ public class ShopController {
     })
     @GetMapping("/{shopId}/assets")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ShopModelResponse> getShopAssets(
+    public ResponseEntity<ModelResponse> getShopAssets(
             @Parameter(description = "ID of the shop") @PathVariable Integer shopId) {
         return ResponseEntity.ok(shopService.getShopModelDetails(shopId));
     }

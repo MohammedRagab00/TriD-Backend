@@ -2,9 +2,9 @@ package com.gotrid.trid.infrastructure.azure;
 
 import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.core.photo.model.Photo;
-import com.gotrid.trid.core.threedModel.model.Model;
 import com.gotrid.trid.core.shop.model.Shop;
 import com.gotrid.trid.core.shop.repository.ShopRepository;
+import com.gotrid.trid.core.threedModel.model.Model;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +51,7 @@ public class ShopStorageService extends AssetStorageService {
             String basePath = ownerId + "/" + shopId + "/photos/";
 
             //* Check if the photo already exists
-            Photo existingPhoto = shop.getPhotos().stream()
+            Photo existingPhoto = shop.getModel().getPhotos().stream()
                     .filter(p ->
                             p.getUrl().contains(Objects.requireNonNull(photoFile.getOriginalFilename()))
                     )
@@ -65,8 +65,8 @@ public class ShopStorageService extends AssetStorageService {
             } else {
                 Photo newPhoto = new Photo();
                 newPhoto.setUrl(newPhotoUrl);
-                newPhoto.setShop(shop);
-                shop.getPhotos().add(newPhoto);
+                newPhoto.setModel(shop.getModel());
+                shop.getModel().getPhotos().add(newPhoto);
             }
         }
 
@@ -105,7 +105,7 @@ public class ShopStorageService extends AssetStorageService {
             deleteAsset(shop.getModel().getGlb(), CONTAINER_NAME);
         }
         deleteAsset(shop.getLogo(), CONTAINER_NAME);
-        shop.getPhotos().forEach(photo -> deleteAsset(photo.getUrl(), CONTAINER_NAME));
+        shop.getModel().getPhotos().forEach(photo -> deleteAsset(photo.getUrl(), CONTAINER_NAME));
     }
 
     private String uploadPhoto(String containerName, String basePath,

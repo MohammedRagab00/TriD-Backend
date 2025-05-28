@@ -1,9 +1,10 @@
 package com.gotrid.trid.core.photo.model;
 
 import com.gotrid.trid.common.model.AuditableEntity;
-import com.gotrid.trid.core.shop.model.Shop;
+import com.gotrid.trid.core.threedModel.model.Model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -18,7 +19,7 @@ import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true, exclude = {"shop"})
+@EqualsAndHashCode(callSuper = true, exclude = {"model"})
 @Entity
 public class Photo extends AuditableEntity {
 
@@ -26,6 +27,7 @@ public class Photo extends AuditableEntity {
     private String url;
 
     @ManyToOne
+    @JoinColumn(nullable = false)
     @OnDelete(action = CASCADE)
-    private Shop shop;
+    private Model model;
 }

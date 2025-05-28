@@ -2,7 +2,8 @@ package com.gotrid.trid.api.shop.service;
 
 import com.gotrid.trid.api.product.service.ProductService;
 import com.gotrid.trid.api.shop.dto.*;
-import com.gotrid.trid.common.exception.custom.shop.AlreadyHaveShopException;
+import com.gotrid.trid.api.threedModel.dto.ModelResponse;
+import com.gotrid.trid.common.exception.custom.shop.AlreadyOwnsShopException;
 import com.gotrid.trid.common.exception.custom.shop.ShopException;
 import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.common.response.PageResponse;
@@ -72,7 +73,7 @@ public class ShopService extends BaseModelService {
             );
         }
         if (shopRepository.findAll().stream().anyMatch(shop -> shop.getOwner().getId().equals(ownerId))) {
-            throw new AlreadyHaveShopException(
+            throw new AlreadyOwnsShopException(
                     "You already has a shop. Only one shop per user is allowed."
             );
         }
@@ -116,16 +117,16 @@ public class ShopService extends BaseModelService {
     }
 
     @Transactional(readOnly = true)
-    public ShopModelResponse getShopModelDetails(Integer shopId) {
+    public ModelResponse getShopModelDetails(Integer shopId) {
         Shop shop = findShopById(shopId);
 
         String glbUrl = shopStorageService.getShopModelUrl(shopId);
 
-        List<String> imageUrls = shop.getPhotos().stream()
+        List<String> imageUrls = shop.getModel().getPhotos().stream()
                 .map(photo -> shopStorageService.getPhotoUrl(photo.getUrl()))
                 .toList();
 
-        return new ShopModelResponse(createModelDetails(shop.getModel(), glbUrl), imageUrls);
+        return new ModelResponse(createModelDetails(shop.getModel(), glbUrl), imageUrls);
     }
 
     @Transactional

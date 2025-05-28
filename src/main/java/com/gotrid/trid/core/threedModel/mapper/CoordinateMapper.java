@@ -20,4 +20,18 @@ public class CoordinateMapper {
                 coordinate.getZ_rot()
         );
     }
+
+    public Coordinates toEntity(CoordinateDTO dto) {
+        return Coordinates.builder()
+                .x_pos(dto.x_pos())
+                .y_pos(dto.y_pos())
+                .z_pos(dto.z_pos())
+                .x_scale(dto.x_scale())
+                .y_scale(dto.y_scale())
+                .z_scale(dto.z_scale())
+                .x_rot(dto.x_rot())
+                .y_rot(dto.y_rot())
+                .z_rot(dto.z_rot())
+                .build();
+    }
 }
