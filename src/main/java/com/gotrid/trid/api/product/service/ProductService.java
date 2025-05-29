@@ -84,7 +84,7 @@ public class ProductService extends BaseModelService {
         Model model = getOrCreateModelAsset(product.getModel());
         Coordinates updatedCoordinates = getOrCreateCoordinates(model);
 
-        updateCoordinates(updatedCoordinates, coordinates);
+        coordinateMapper.updateCoordinates(updatedCoordinates, coordinates);
         model.setCoordinates(updatedCoordinates);
         product.setModel(model);
 

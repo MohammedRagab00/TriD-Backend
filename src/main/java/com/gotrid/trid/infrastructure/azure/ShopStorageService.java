@@ -108,15 +108,6 @@ public class ShopStorageService extends AssetStorageService {
         shop.getModel().getPhotos().forEach(photo -> deleteAsset(photo.getUrl(), CONTAINER_NAME));
     }
 
-    private String uploadPhoto(String containerName, String basePath,
-                               MultipartFile file) {
-
-        if (file != null && !file.isEmpty()) {
-            return azureStorageService.uploadFile(file, containerName, basePath + file.getOriginalFilename(), MAX_SIZE, ALLOWED_TYPES);
-        }
-        return null;
-    }
-
     private String uploadLogo(String containerName, String basePath,
                               MultipartFile file) {
 
