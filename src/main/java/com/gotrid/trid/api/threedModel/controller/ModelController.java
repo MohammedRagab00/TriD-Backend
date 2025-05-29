@@ -30,6 +30,12 @@ public class ModelController {
 
     private final ModelService modelService;
 
+    @Operation(summary = "Create a new model", description = "Creates a new model (glb, images) and returns its ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Shop created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input"),
+            @ApiResponse(responseCode = "403", description = "Not a seller")
+    })
     @PostMapping
     @SecurityRequirement(name = "Bearer Authentication")
     @PreAuthorize("hasRole('ADMIN')")
