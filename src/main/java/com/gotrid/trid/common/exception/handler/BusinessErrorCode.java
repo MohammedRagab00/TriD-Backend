@@ -38,15 +38,13 @@ public enum BusinessErrorCode {
     INTERNAL_ERROR(5001, INTERNAL_SERVER_ERROR, "Internal server error"),
 
     // Shop Management
-    SHOP_NOT_FOUND(6001, NOT_FOUND, "Shop not found"),
-    SHOP_NAME_EXISTS(6002, CONFLICT, "Shop name already exists"),
-    UNAUTHORIZED_ACCESS(6003, FORBIDDEN, "Unauthorized shop access"),
-    SHOP_ALREADY_EXISTS(6004, CONFLICT, "You already have a shop. Only one shop per user is allowed"),
-    INVALID_SOCIAL_LINK(6005, BAD_REQUEST, "Invalid social media link"),
-    SHOP_ASSET_ERROR(6006, BAD_REQUEST, "Shop asset error"),
+    SHOP_NAME_EXISTS(6001, CONFLICT, "Shop name already exists"),
+    UNAUTHORIZED_ACCESS(6002, FORBIDDEN, "Unauthorized shop access"),
+    SHOP_ALREADY_EXISTS(6003, CONFLICT, "You already have a shop. Only one shop per user is allowed"),
+    INVALID_SOCIAL_LINK(6004, BAD_REQUEST, "Invalid social media link"),
+    SHOP_ASSET_ERROR(6005, BAD_REQUEST, "Shop asset error"),
 
-    // Product Management
-    PRODUCT_NOT_FOUND(7001, NOT_FOUND, "Product not found"),
+    ENTITY_NOT_FOUND(7001, NOT_FOUND, "Requested entity not found"),
     ;
 
     private final int code;

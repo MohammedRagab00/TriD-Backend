@@ -1,11 +1,13 @@
 package com.gotrid.trid.api.shop.service;
 
 import com.gotrid.trid.api.product.service.ProductService;
-import com.gotrid.trid.api.shop.dto.*;
+import com.gotrid.trid.api.shop.dto.ShopRequest;
+import com.gotrid.trid.api.shop.dto.ShopResponse;
+import com.gotrid.trid.api.shop.dto.ShopUpdateRequest;
+import com.gotrid.trid.api.shop.dto.SocialDTO;
 import com.gotrid.trid.api.threedModel.dto.ModelResponse;
 import com.gotrid.trid.common.exception.custom.shop.AlreadyOwnsShopException;
 import com.gotrid.trid.common.exception.custom.shop.ShopException;
-import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.core.product.model.Product;
 import com.gotrid.trid.core.shop.mapper.ShopMapper;
@@ -22,6 +24,7 @@ import com.gotrid.trid.core.user.model.Users;
 import com.gotrid.trid.core.user.repository.UserRepository;
 import com.gotrid.trid.infrastructure.azure.ShopStorageService;
 import com.gotrid.trid.infrastructure.service.BaseModelService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -211,7 +214,7 @@ public class ShopService extends BaseModelService {
 
     private Shop findShopById(Integer shopId) {
         return shopRepository.findById(shopId)
-                .orElseThrow(() -> new ShopNotFoundException("Shop not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Shop not found"));
     }
 
     private void validateShopName(Shop shop, String newName) {

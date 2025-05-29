@@ -1,28 +1,27 @@
 package com.gotrid.trid.api.product.service;
 
-import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
-import com.gotrid.trid.core.threedModel.dto.ModelDTO;
 import com.gotrid.trid.api.product.dto.ProductRequest;
 import com.gotrid.trid.api.product.dto.ProductResponse;
 import com.gotrid.trid.api.product.dto.ProductVariantRequest;
 import com.gotrid.trid.api.product.dto.ProductVariantResponse;
 import com.gotrid.trid.common.exception.custom.product.DuplicateResourceException;
-import com.gotrid.trid.common.exception.custom.product.ProductNotFoundException;
-import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.common.response.PageResponse;
-import com.gotrid.trid.core.product.model.Product;
-import com.gotrid.trid.core.product.model.ProductVariant;
-import com.gotrid.trid.core.threedModel.mapper.CoordinateMapper;
 import com.gotrid.trid.core.product.mapper.ProductMapper;
 import com.gotrid.trid.core.product.mapper.ProductVariantMapper;
-import com.gotrid.trid.core.shop.model.*;
+import com.gotrid.trid.core.product.model.Product;
+import com.gotrid.trid.core.product.model.ProductVariant;
 import com.gotrid.trid.core.product.repository.ProductRepository;
 import com.gotrid.trid.core.product.repository.ProductVariantRepository;
+import com.gotrid.trid.core.shop.model.Shop;
 import com.gotrid.trid.core.shop.repository.ShopRepository;
+import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
+import com.gotrid.trid.core.threedModel.dto.ModelDTO;
+import com.gotrid.trid.core.threedModel.mapper.CoordinateMapper;
 import com.gotrid.trid.core.threedModel.model.Coordinates;
 import com.gotrid.trid.core.threedModel.model.Model;
 import com.gotrid.trid.infrastructure.azure.ProductStorageService;
 import com.gotrid.trid.infrastructure.service.BaseModelService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -64,7 +63,7 @@ public class ProductService extends BaseModelService {
     @Transactional
     public Integer createProduct(Integer shopId, Integer ownerId, ProductRequest request) {
         Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new ShopNotFoundException("Shop not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Shop not found"));
 
         validateOwnership(ownerId, shop.getOwner().getId(),
                 "Unauthorized: You don't own this shop to be able to create a product");
@@ -138,7 +137,7 @@ public class ProductService extends BaseModelService {
     @Transactional(readOnly = true)
     public PageResponse<ProductVariantResponse> getProductVariants(Integer productId, int page, int size) {
         if (!productRepository.existsById(productId)) {
-            throw new ProductNotFoundException("Product not found with id: " + productId);
+            throw new EntityNotFoundException("Product not found with id: " + productId);
         }
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
@@ -211,12 +210,12 @@ public class ProductService extends BaseModelService {
 
     private Product findProductById(Integer productId) {
         return productRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + productId));
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productId));
     }
 
     private ProductVariant findVariantById(Integer variantId) {
         return variantRepository.findById(variantId)
-                .orElseThrow(() -> new ProductNotFoundException("Product variant not found with id: " + variantId));
+                .orElseThrow(() -> new EntityNotFoundException("Product variant not found with id: " + variantId));
     }
 
     public ProductResponse getProduct(Integer productId) {

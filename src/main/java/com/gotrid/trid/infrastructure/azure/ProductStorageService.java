@@ -1,9 +1,9 @@
 package com.gotrid.trid.infrastructure.azure;
 
-import com.gotrid.trid.common.exception.custom.product.ProductNotFoundException;
-import com.gotrid.trid.core.threedModel.model.Model;
 import com.gotrid.trid.core.product.model.Product;
 import com.gotrid.trid.core.product.repository.ProductRepository;
+import com.gotrid.trid.core.threedModel.model.Model;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,6 +57,6 @@ public class ProductStorageService extends AssetStorageService {
 
     private Product findProductById(Integer productId) {
         return productRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
     }
 }

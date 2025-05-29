@@ -2,14 +2,13 @@ package com.gotrid.trid.common.exception.handler;
 
 import com.gotrid.trid.common.exception.custom.*;
 import com.gotrid.trid.common.exception.custom.product.DuplicateResourceException;
-import com.gotrid.trid.common.exception.custom.product.ProductNotFoundException;
 import com.gotrid.trid.common.exception.custom.shop.AlreadyOwnsShopException;
 import com.gotrid.trid.common.exception.custom.shop.ShopException;
-import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.common.exception.custom.user.InvalidAgeException;
 import com.gotrid.trid.common.exception.custom.user.InvalidGenderException;
 import com.gotrid.trid.common.exception.custom.user.InvalidPasswordException;
 import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.context.MessageSourceResolvable;
@@ -104,14 +103,13 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ExceptionResponse> handleProductNotFoundException(ProductNotFoundException ex) {
-        log.warn("Product not found: {}", ex.getMessage());
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleEntityNotFoundException(EntityNotFoundException ex) {
         return buildErrorResponse(
-                PRODUCT_NOT_FOUND,
+                ENTITY_NOT_FOUND,
                 ex.getMessage(),
                 null,
-                Map.of("product", "Product not found")
+                Map.of("entity", "Requested resource does not exist")
         );
     }
 
@@ -312,17 +310,6 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 null,
                 Map.of("shop", "Only one shop per user is allowed")
-        );
-    }
-
-    @ExceptionHandler(ShopNotFoundException.class)
-    public ResponseEntity<ExceptionResponse> handleShopNotFoundException(ShopNotFoundException ex) {
-        log.warn("Shop not found: {}", ex.getMessage());
-        return buildErrorResponse(
-                SHOP_NOT_FOUND,
-                ex.getMessage(),
-                null,
-                Map.of("shop", "Requested shop does not exist")
         );
     }
 

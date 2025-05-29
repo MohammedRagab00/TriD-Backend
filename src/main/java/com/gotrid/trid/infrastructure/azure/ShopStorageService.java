@@ -1,10 +1,10 @@
 package com.gotrid.trid.infrastructure.azure;
 
-import com.gotrid.trid.common.exception.custom.shop.ShopNotFoundException;
 import com.gotrid.trid.core.photo.model.Photo;
 import com.gotrid.trid.core.shop.model.Shop;
 import com.gotrid.trid.core.shop.repository.ShopRepository;
 import com.gotrid.trid.core.threedModel.model.Model;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -120,6 +120,6 @@ public class ShopStorageService extends AssetStorageService {
 
     private Shop getShopById(Integer shopId) {
         return shopRepository.findById(shopId)
-                .orElseThrow(() -> new ShopNotFoundException("Shop not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Shop not found"));
     }
 }
