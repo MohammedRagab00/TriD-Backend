@@ -58,3 +58,4 @@ azure:
     pp-container-name: ${AZURE_PP_CONTAINER_NAME}
     shop-container-name: ${AZURE_SHOP_CONTAINER_NAME}
     product-container-name: ${AZURE_PRODUCT_CONTAINER_NAME}
+    model-container-name: ${AZURE_MODEL_CONTAINER_NAME}

@@ -109,7 +109,7 @@ public class ShopService extends BaseModelService {
         Model model = getOrCreateModelAsset(shop.getModel());
         Coordinates updatedCoordinates = getOrCreateCoordinates(model);
 
-        updateCoordinates(updatedCoordinates, coordinates);
+        coordinateMapper.updateCoordinates(updatedCoordinates, coordinates);
         model.setCoordinates(updatedCoordinates);
         shop.setModel(model);
 

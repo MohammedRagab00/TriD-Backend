@@ -43,7 +43,7 @@ public class SecurityConfig {
                         req
                                 .requestMatchers(
                                         "/auth/**",
-                                        // "/v2/api-docs",
+                                        "/models/*",
                                         "/v3/api-docs",
                                         "/v3/api-docs/**",
                                         "/swagger-resources",

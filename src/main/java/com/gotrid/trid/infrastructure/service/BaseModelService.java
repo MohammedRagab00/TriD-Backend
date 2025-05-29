@@ -15,18 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class BaseModelService {
     protected final CoordinateMapper coordinateMapper;
 
-    protected void updateCoordinates(Coordinates coordinates, CoordinateDTO dto) {
-        coordinates.setX_pos(dto.x_pos());
-        coordinates.setY_pos(dto.y_pos());
-        coordinates.setZ_pos(dto.z_pos());
-        coordinates.setX_scale(dto.x_scale());
-        coordinates.setY_scale(dto.y_scale());
-        coordinates.setZ_scale(dto.z_scale());
-        coordinates.setX_rot(dto.x_rot());
-        coordinates.setY_rot(dto.y_rot());
-        coordinates.setZ_rot(dto.z_rot());
-    }
-
     protected Model getOrCreateModelAsset(Model existing) {
         return existing != null ? existing : new Model();
     }

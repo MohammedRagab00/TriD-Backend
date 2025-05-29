@@ -8,6 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static com.gotrid.trid.infrastructure.azure.AzureStorageService.ALLOWED_TYPES;
+
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public abstract class AssetStorageService {
@@ -20,6 +22,15 @@ public abstract class AssetStorageService {
         if (glbFile != null && !glbFile.isEmpty()) {
             String gltfFilename = "glbFile" + azureStorageService.getFileExtension(glbFile);
             return azureStorageService.uploadFile(glbFile, containerName, basePath + gltfFilename, MAX_SIZE, List.of("model/gltf-binary"));
+        }
+        return null;
+    }
+
+    protected String uploadPhoto(String containerName, String basePath,
+                              MultipartFile file) {
+
+        if (file != null && !file.isEmpty()) {
+            return azureStorageService.uploadFile(file, containerName, basePath + file.getOriginalFilename(), MAX_SIZE, ALLOWED_TYPES);
         }
         return null;
     }
