@@ -34,14 +34,14 @@ public class WishlistController {
     @PutMapping
     public ResponseEntity<Void> addToWishlist(
             @RequestParam
-            @Parameter(description = "ID of the product to add or remove", required = true, example = "123")
+            @Parameter(description = "ID of the product to add or remove", required = true)
             Integer productId,
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserPrincipal principal
     ) {
         wishlistService.addOrRemoveFromWishlist(productId, principal.user().getId());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Get wishlist products", description = "Retrieves all products in the user's wishlist")

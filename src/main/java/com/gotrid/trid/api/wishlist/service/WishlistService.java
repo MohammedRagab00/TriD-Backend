@@ -27,14 +27,14 @@ import java.util.Optional;
 @Service
 public class WishlistService {
     private final WishlistRepository wishlistRepository;
-    private final ProductRepository productPage;
+    private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final ProductMapper productMapper;
 
     @Transactional
     public void addOrRemoveFromWishlist(Integer productId, Integer userId) {
         Users user = getUser(userId);
-        Product product = productPage.findById(productId)
+        Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productId));
         Optional<Wishlist> optionalWishlist = wishlistRepository.findByUser(user);
 

@@ -122,7 +122,7 @@ public class ProductService extends BaseModelService {
         validateOwnership(ownerId, product.getShop().getOwner().getId(),
                 "Unauthorized: You don't own this shop to be able to add variants to this product");
 
-        if (variantRepository.existsByColorAndSize(request.color(), request.size())) {
+        if (variantRepository.existsByColorAndSizeAndProduct(request.color(), request.size(), product)) {
             throw new DuplicateResourceException(
                     "Product variant already exists with size: " + request.size() + " and color: " + request.color()
             );

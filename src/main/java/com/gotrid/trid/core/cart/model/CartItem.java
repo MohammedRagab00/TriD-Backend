@@ -28,10 +28,9 @@ public class CartItem {
     private Cart cart;
 
     @ManyToOne
-    @MapsId("productId")
-    @JoinColumn(name = "product_id")
+    @MapsId("variantId")
     @OnDelete(action = CASCADE)
-    private ProductVariant productVariant;
+    private ProductVariant variant;
 
     @Column(nullable = false)
     private Integer quantity;
