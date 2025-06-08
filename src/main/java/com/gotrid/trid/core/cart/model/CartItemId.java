@@ -11,5 +11,5 @@ import lombok.*;
 @Embeddable
 public class CartItemId {
     private Integer cartId;
-    private Integer productId;
+    private Integer variantId;
 }

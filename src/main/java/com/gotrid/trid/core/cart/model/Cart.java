@@ -20,9 +20,8 @@ import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 
 @Getter
 @Setter
-@SuperBuilder
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"cartItem"})
 @Entity
 public class Cart extends AuditableEntity {
 

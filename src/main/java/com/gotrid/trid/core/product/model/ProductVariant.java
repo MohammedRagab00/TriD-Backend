@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 @Table(
         uniqueConstraints = @UniqueConstraint(
                 name = "uk_product_variant_color_size",
-                columnNames = {"color", "size"}
+                columnNames = {"color", "size", "product"}
         )
 )
 public class ProductVariant extends BaseEntity {
