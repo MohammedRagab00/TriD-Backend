@@ -1,7 +1,7 @@
 package com.gotrid.trid.api.cart.controller;
 
+import com.gotrid.trid.api.cart.dto.CartResponse;
 import com.gotrid.trid.api.cart.service.CartService;
-import com.gotrid.trid.api.product.dto.ProductVariantResponse;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.config.security.userdetails.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -72,7 +72,7 @@ public class CartController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @GetMapping
-    public ResponseEntity<PageResponse<ProductVariantResponse>> getCart(
+    public ResponseEntity<PageResponse<CartResponse>> getCart(
             @Parameter(description = "Page number", schema = @Schema(defaultValue = "0"))
             @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Items per page", schema = @Schema(defaultValue = "10"))
