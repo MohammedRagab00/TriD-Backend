@@ -18,12 +18,10 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true, exclude = {"product"})
 @Entity
-@Table(
-        uniqueConstraints = @UniqueConstraint(
-                name = "uk_product_variant_color_size",
-                columnNames = {"color", "size", "product"}
-        )
-)
+@Table(uniqueConstraints = @UniqueConstraint(
+        name = "uk_product_variant_color_size",
+        columnNames = {"color", "size", "product"}
+))
 public class ProductVariant extends BaseEntity {
     @Column(length = 50)
     private String color;

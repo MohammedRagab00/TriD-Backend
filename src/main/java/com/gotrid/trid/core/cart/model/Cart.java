@@ -1,4 +1,4 @@
-    package com.gotrid.trid.core.cart.model;
+package com.gotrid.trid.core.cart.model;
 
 import com.gotrid.trid.common.model.AuditableEntity;
 import com.gotrid.trid.core.user.model.Users;
@@ -10,7 +10,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.OnDelete;
 
 import java.util.HashSet;

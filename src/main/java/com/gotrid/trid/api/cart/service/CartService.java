@@ -1,12 +1,13 @@
 package com.gotrid.trid.api.cart.service;
 
-import com.gotrid.trid.api.product.dto.ProductVariantResponse;
+import com.gotrid.trid.api.cart.dto.CartResponse;
 import com.gotrid.trid.common.response.PageResponse;
+import com.gotrid.trid.core.cart.mapper.CartItemMapper;
 import com.gotrid.trid.core.cart.model.Cart;
 import com.gotrid.trid.core.cart.model.CartItem;
 import com.gotrid.trid.core.cart.model.CartItemId;
+import com.gotrid.trid.core.cart.repository.CartItemRepository;
 import com.gotrid.trid.core.cart.repository.CartRepository;
-import com.gotrid.trid.core.product.mapper.ProductVariantMapper;
 import com.gotrid.trid.core.product.model.ProductVariant;
 import com.gotrid.trid.core.product.repository.ProductVariantRepository;
 import com.gotrid.trid.core.user.model.Users;
@@ -17,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,9 +30,10 @@ import java.util.Optional;
 public class CartService {
 
     private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
     private final ProductVariantRepository variantRepository;
-    private final ProductVariantMapper variantMapper;
+    private final CartItemMapper cartItemMapper;
 
 
     @Transactional
@@ -98,23 +99,23 @@ public class CartService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<ProductVariantResponse> getCart(int page, int size, Integer userId) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+    public PageResponse<CartResponse> getCart(int page, int size, Integer userId) {
+        Pageable pageable = PageRequest.of(page, size);
 
-        Page<ProductVariant> variantPage = cartRepository.findCartVariants(userId, pageable);
+        Page<CartItem> cartPage = cartItemRepository.findByCart_User_Id(userId, pageable);
 
-        List<ProductVariantResponse> responses = variantPage.stream()
-                .map(variantMapper::toResponse)
+        List<CartResponse> responses = cartPage.stream()
+                .map(cartItemMapper)
                 .toList();
 
         return new PageResponse<>(
                 responses,
-                variantPage.getNumber(),
-                variantPage.getSize(),
-                variantPage.getTotalElements(),
-                variantPage.getTotalPages(),
-                variantPage.isFirst(),
-                variantPage.isLast()
+                cartPage.getNumber(),
+                cartPage.getSize(),
+                cartPage.getTotalElements(),
+                cartPage.getTotalPages(),
+                cartPage.isFirst(),
+                cartPage.isLast()
         );
 
     }
