@@ -25,9 +25,8 @@ public class CouponRestriction {
 
     @Column(length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
-    private Restriction restriction_type;
+    private Restriction restrictionType;
 
     @Column(nullable = false)
-    private int restriction_value;
-
+    private Integer restrictionValue;
 }
