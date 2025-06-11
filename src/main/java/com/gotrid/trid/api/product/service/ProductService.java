@@ -211,7 +211,7 @@ public class ProductService extends BaseModelService {
     @Transactional(readOnly = true)
     public PageResponse<ProductResponse> getProductsByName(String name, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
-        Page<Product> productsPage = productRepository.findByNameContaining(name, pageable);
+        Page<Product> productsPage = productRepository.findByNameContainingIgnoreCase(name, pageable);
 
         List<ProductResponse> responses = productsPage.stream()
                 .map(productMapper::toResponse)
