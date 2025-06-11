@@ -1,7 +1,5 @@
 package com.gotrid.trid.api.product.controller;
 
-import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
-import com.gotrid.trid.core.threedModel.dto.ModelDTO;
 import com.gotrid.trid.api.product.dto.ProductRequest;
 import com.gotrid.trid.api.product.dto.ProductResponse;
 import com.gotrid.trid.api.product.dto.ProductVariantRequest;
@@ -9,6 +7,8 @@ import com.gotrid.trid.api.product.dto.ProductVariantResponse;
 import com.gotrid.trid.api.product.service.ProductService;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.config.security.userdetails.UserPrincipal;
+import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
+import com.gotrid.trid.core.threedModel.dto.ModelDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -218,5 +218,19 @@ public class ProductController {
             @Parameter(description = "ID of the product") @PathVariable Integer productId
     ) {
         return ResponseEntity.ok(productService.getProduct(productId));
+    }
+
+    @Operation(summary = "Find products by name", description = "Retrieves all products containing the specified name")
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PageResponse<ProductResponse>> getProductsByName(
+            @RequestParam String name,
+            @Parameter(description = "Page number", schema = @Schema(defaultValue = "0"))
+            @RequestParam(defaultValue = "0") int page,
+
+            @Parameter(description = "Items per page", schema = @Schema(defaultValue = "10"))
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(productService.getProductsByName(name, page, size));
     }
 }

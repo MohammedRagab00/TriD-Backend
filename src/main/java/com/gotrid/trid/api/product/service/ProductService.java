@@ -208,6 +208,26 @@ public class ProductService extends BaseModelService {
         productStorageService.uploadProductAssets(ownerId, productId, glbFile);
     }
 
+    @Transactional(readOnly = true)
+    public PageResponse<ProductResponse> getProductsByName(String name, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+        Page<Product> productsPage = productRepository.findByNameContaining(name, pageable);
+
+        List<ProductResponse> responses = productsPage.stream()
+                .map(productMapper::toResponse)
+                .toList();
+
+        return new PageResponse<>(
+                responses,
+                productsPage.getNumber(),
+                productsPage.getSize(),
+                productsPage.getTotalElements(),
+                productsPage.getTotalPages(),
+                productsPage.isFirst(),
+                productsPage.isLast()
+        );
+    }
+
     private Product findProductById(Integer productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productId));
