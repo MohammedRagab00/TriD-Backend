@@ -11,9 +11,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@EnableScheduling
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 @EnableAsync
+@EnableScheduling
 public class TriDApplication {
 
     public static void main(String[] args) {

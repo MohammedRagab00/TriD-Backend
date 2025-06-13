@@ -23,6 +23,8 @@ import com.gotrid.trid.infrastructure.azure.ProductStorageService;
 import com.gotrid.trid.infrastructure.service.BaseModelService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -61,6 +63,7 @@ public class ProductService extends BaseModelService {
     }
 
     @Transactional
+    @CacheEvict(value = "products", key = "#shopId + '*'")
     public Integer createProduct(Integer shopId, Integer ownerId, ProductRequest request) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new EntityNotFoundException("Shop not found"));
@@ -75,6 +78,7 @@ public class ProductService extends BaseModelService {
     }
 
     @Transactional
+    @CacheEvict(value = "productModel", key = "#productId")
     public void updateProductCoordinates(Integer productId, Integer ownerId, CoordinateDTO coordinates) {
         Product product = findProductById(productId);
         validateOwnership(ownerId, product.getShop().getOwner().getId(),
@@ -90,6 +94,7 @@ public class ProductService extends BaseModelService {
         productRepository.save(product);
     }
 
+    @Cacheable(value = "productModel", key = "#productId")
     public ModelDTO getProductModelDetails(Integer productId) {
         Product product = findProductById(productId);
         String glbUrl = productStorageService.getProductModelUrl(productId);
@@ -97,6 +102,8 @@ public class ProductService extends BaseModelService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "products", key = "#shopId + '-' + #page + '-' + #size",
+            condition = "#size <= 20", unless = "#result.content.isEmpty()")
     public PageResponse<ProductResponse> getShopProducts(Integer shopId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<Product> productsPage = productRepository.findByShopId(shopId, pageable);
@@ -117,6 +124,7 @@ public class ProductService extends BaseModelService {
     }
 
     @Transactional
+    @CacheEvict(value = "productVariant", allEntries = true, condition = "#productId != null")
     public Integer addProductVariant(Integer productId, Integer ownerId, ProductVariantRequest request) {
         Product product = findProductById(productId);
         validateOwnership(ownerId, product.getShop().getOwner().getId(),
@@ -135,6 +143,8 @@ public class ProductService extends BaseModelService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "productVariant", key = "#productId + '-' + #page + '-' + #size",
+            condition = "#size <= 20", unless = "#result.content.isEmpty()")
     public PageResponse<ProductVariantResponse> getProductVariants(Integer productId, int page, int size) {
         if (!productRepository.existsById(productId)) {
             throw new EntityNotFoundException("Product not found with id: " + productId);
@@ -159,6 +169,7 @@ public class ProductService extends BaseModelService {
     }
 
     @Transactional
+    @CacheEvict(value = "products", allEntries = true, condition = "#productId != null")
     public void updateProduct(Integer productId, Integer ownerId, ProductRequest request) {
         Product product = findProductById(productId);
         validateOwnership(ownerId, product.getShop().getOwner().getId(),
@@ -172,6 +183,7 @@ public class ProductService extends BaseModelService {
     }
 
     @Transactional
+    @CacheEvict(value = "productVariant", allEntries = true, condition = "#variantId != null")
     public void updateProductVariant(Integer variantId, Integer ownerId, ProductVariantRequest request) {
         ProductVariant variant = findVariantById(variantId);
         validateOwnership(ownerId, variant.getProduct().getShop().getOwner().getId(),
@@ -186,6 +198,7 @@ public class ProductService extends BaseModelService {
     }
 
     @Transactional
+    @CacheEvict(value = "productVariant", allEntries = true, condition = "#variantId != null")
     public void deleteProductVariant(Integer variantId, Integer ownerId) {
         ProductVariant variant = findVariantById(variantId);
         validateOwnership(ownerId, variant.getProduct().getShop().getOwner().getId(),
@@ -194,6 +207,7 @@ public class ProductService extends BaseModelService {
     }
 
     @Transactional
+    @CacheEvict(value = "productModel", key = "#productId")
     public void deleteProduct(Integer productId, Integer ownerId) {
         Product product = findProductById(productId);
         validateOwnership(ownerId, product.getShop().getOwner().getId(),
@@ -204,6 +218,7 @@ public class ProductService extends BaseModelService {
     }
 
     @Transactional
+    @CacheEvict(value = "productModel", key = "#productId")
     public void uploadProductAssets(Integer ownerId, Integer productId, MultipartFile glbFile) {
         productStorageService.uploadProductAssets(ownerId, productId, glbFile);
     }

@@ -8,6 +8,10 @@ import com.gotrid.trid.core.cart.model.CartItem;
 import com.gotrid.trid.core.cart.model.CartItemId;
 import com.gotrid.trid.core.cart.repository.CartItemRepository;
 import com.gotrid.trid.core.cart.repository.CartRepository;
+import com.gotrid.trid.core.order.model.Order;
+import com.gotrid.trid.core.order.model.OrderItem;
+import com.gotrid.trid.core.order.model.OrderItemId;
+import com.gotrid.trid.core.order.repository.OrderRepository;
 import com.gotrid.trid.core.product.model.ProductVariant;
 import com.gotrid.trid.core.product.repository.ProductVariantRepository;
 import com.gotrid.trid.core.user.model.Users;
@@ -15,6 +19,9 @@ import com.gotrid.trid.core.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,8 +29,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static com.gotrid.trid.core.order.model.Status.PENDING;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Service
@@ -34,9 +45,11 @@ public class CartService {
     private final UserRepository userRepository;
     private final ProductVariantRepository variantRepository;
     private final CartItemMapper cartItemMapper;
+    private final OrderRepository orderRepository;
 
 
     @Transactional
+    @CacheEvict(value = "userCarts", key = "#userId + '*'", beforeInvocation = true)
     public void addToCart(Integer variantId, Integer quantity, Integer userId) {
         Users user = getUser(userId);
         ProductVariant variant = variantRepository.findById(variantId)
@@ -76,14 +89,13 @@ public class CartService {
     }
 
     @Transactional
+    @CacheEvict(value = "userCarts", key = "#userId + '*'", beforeInvocation = true)
     public void removeFromCart(Integer variantId, Integer userId) {
         Users user = getUser(userId);
         ProductVariant variant = variantRepository.findById(variantId)
                 .orElseThrow(() -> new EntityNotFoundException("Product variant not found with id: " + variantId));
 
-        Cart cart = cartRepository.findByUser(user).orElseThrow(
-                () -> new EntityNotFoundException("Cart not found")
-        );
+        Cart cart = getCart(user);
 
         Optional<CartItem> cartItem = cart.getCartItem()
                 .stream()
@@ -99,14 +111,15 @@ public class CartService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "userCarts", key = "#userId + '-' + #page + '-' + #size",
+            condition = "#size <= 20",
+            unless = "#result.content.isEmpty()")
     public PageResponse<CartResponse> getCart(int page, int size, Integer userId) {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<CartItem> cartPage = cartItemRepository.findByCart_User_Id(userId, pageable);
 
-        List<CartResponse> responses = cartPage.stream()
-                .map(cartItemMapper)
-                .toList();
+        List<CartResponse> responses = cartPage.map(cartItemMapper).getContent();
 
         return new PageResponse<>(
                 responses,
@@ -120,8 +133,58 @@ public class CartService {
 
     }
 
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "userCarts", key = "#id + '*'", beforeInvocation = true),
+            @CacheEvict(value = {"orderHistory", "sellerOrders"}, allEntries = true)
+    })
+    public Integer checkout(Integer id) {
+        Users user = getUser(id);
+        Cart cart = getCart(user);
+        validateCart(cart);
+
+        Order order = new Order();
+        order.setCustomer(user);
+        order.setStatus(PENDING);
+
+        BigDecimal totalAmount = cart.getCartItem().stream()
+                .map(item -> item.getVariant().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        order.setTotal_amount(totalAmount);
+
+        order.setOrderItems(cart.getCartItem().stream()
+                .map(item -> OrderItem.builder()
+                        .id(new OrderItemId(order.getId(), item.getVariant().getId()))
+                        .order(order)
+                        .variant(item.getVariant())
+                        .quantity(item.getQuantity())
+                        .price(item.getVariant().getPrice())
+                        .build())
+                .collect(Collectors.toSet()));
+
+        cartRepository.delete(cart);
+        return orderRepository.saveAndFlush(order).getId();
+    }
+
+    private void validateCart(Cart cart) {
+        if (cart.getCartItem().isEmpty()) {
+            throw new IllegalArgumentException("Cart is empty, cannot proceed to checkout");
+        }
+
+        for (CartItem item : cart.getCartItem()) {
+            if (item.getVariant().getStock() < item.getQuantity()) {
+                throw new IllegalArgumentException("Requested quantity exceeds available stock for variant: " + item.getVariant().getId());
+            }
+        }
+    }
+
     private Users getUser(Integer id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+    }
+
+    private Cart getCart(Users user) {
+        return cartRepository.findByUser(user)
+                .orElseThrow(() -> new EntityNotFoundException("Cart not found"));
     }
 }
