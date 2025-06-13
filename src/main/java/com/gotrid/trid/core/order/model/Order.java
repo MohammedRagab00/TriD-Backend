@@ -11,6 +11,8 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.OnDelete;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.hibernate.annotations.OnDeleteAction.CASCADE;
 
@@ -33,4 +35,7 @@ public class Order extends AuditableEntity {
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
+    private Set<OrderItem> orderItems = new HashSet<>();
 }

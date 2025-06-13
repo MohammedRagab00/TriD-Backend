@@ -1,18 +1,20 @@
 package com.gotrid.trid.api.user.service;
 
-import com.gotrid.trid.common.exception.custom.user.InvalidAgeException;
-import com.gotrid.trid.common.exception.custom.user.InvalidGenderException;
-import com.gotrid.trid.common.exception.custom.user.InvalidPasswordException;
-import com.gotrid.trid.infrastructure.azure.ProfilePhotoService;
-import com.gotrid.trid.core.user.model.Gender;
-import com.gotrid.trid.core.user.model.Users;
 import com.gotrid.trid.api.user.dto.ChangePasswordRequest;
 import com.gotrid.trid.api.user.dto.UpdateProfileRequest;
 import com.gotrid.trid.api.user.dto.UserProfileResponse;
+import com.gotrid.trid.common.exception.custom.user.InvalidAgeException;
+import com.gotrid.trid.common.exception.custom.user.InvalidGenderException;
+import com.gotrid.trid.common.exception.custom.user.InvalidPasswordException;
 import com.gotrid.trid.core.user.mapper.UserMapper;
+import com.gotrid.trid.core.user.model.Gender;
+import com.gotrid.trid.core.user.model.Users;
 import com.gotrid.trid.core.user.repository.UserRepository;
+import com.gotrid.trid.infrastructure.azure.ProfilePhotoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @CacheEvict(value = "userProfiles", key = "#email")
     public void updateProfile(String email, UpdateProfileRequest request) {
         var user = getUserByEmail(email);
 
@@ -59,14 +62,17 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @CacheEvict(value = "userProfiles", key = "#email")
     public void updatePhoto(String email, MultipartFile file) {
         profilePhotoService.updateProfilePhoto(email, file);
     }
 
+    @CacheEvict(value = "userProfiles", key = "#email")
     public void deletePhoto(String email) {
         profilePhotoService.deleteProfilePhoto(email);
     }
 
+    @Cacheable(value = "userProfiles", key = "#email")
     public UserProfileResponse getUserProfile(String email) {
         var user = getUserByEmail(email);
 

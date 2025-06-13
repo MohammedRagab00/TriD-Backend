@@ -19,6 +19,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @RestController
 @RequestMapping("/cart")
@@ -62,7 +64,6 @@ public class CartController {
         return ResponseEntity.noContent().build();
     }
 
-
     @Operation(summary = "Retrieve product variants in the user's cart",
             description = "Returns a paginated list of product variants in the user's cart.")
     @ApiResponses({
@@ -82,4 +83,13 @@ public class CartController {
         return ResponseEntity.ok(cartService.getCart(page, size, principal.user().getId()));
     }
 
+    @Operation(summary = "Place an order with the items in the cart",
+            description = "Creates an order based on the items in the user's cart and returns the order ID.")
+    @PostMapping("/checkout")
+    public ResponseEntity<Void> checkout(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        Integer id = cartService.checkout(principal.user().getId());
+        return ResponseEntity.created(URI.create("api/v1/order/" + id)).build();
+    }
 }

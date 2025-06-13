@@ -26,6 +26,9 @@ import com.gotrid.trid.infrastructure.azure.ShopStorageService;
 import com.gotrid.trid.infrastructure.service.BaseModelService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -67,6 +70,7 @@ public class ShopService extends BaseModelService {
         this.productService = productService;
     }
 
+    @CacheEvict(value = "allShops", allEntries = true)
     @Transactional
     public Integer createShop(Integer ownerId, ShopRequest req) {
         if (shopRepository.existsByNameIgnoreCase(req.name())) {
@@ -89,6 +93,10 @@ public class ShopService extends BaseModelService {
         return shopRepository.saveAndFlush(shop).getId();
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "shops", key = "#shopId"),
+            @CacheEvict(value = "allShops", allEntries = true)
+    })
     @Transactional
     public void updateShopSocial(Integer ownerId, Integer shopId, SocialDTO socialDTO) {
         Shop shop = findShopById(shopId);
@@ -104,6 +112,7 @@ public class ShopService extends BaseModelService {
         shopRepository.save(shop);
     }
 
+    @CacheEvict(value = "shopModels", key = "#shopId")
     @Transactional
     public void updateShopCoordinates(Integer ownerId, Integer shopId, CoordinateDTO coordinates) {
         Shop shop = findShopById(shopId);
@@ -120,18 +129,23 @@ public class ShopService extends BaseModelService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "shopModels", key = "#shopId")
     public ModelResponse getShopModelDetails(Integer shopId) {
         Shop shop = findShopById(shopId);
 
         String glbUrl = shopStorageService.getShopModelUrl(shopId);
 
-        List<String> imageUrls = shop.getModel().getPhotos().stream()
+        List<String> imageUrls = shop.getModel() == null ? null : shop.getModel().getPhotos().stream()
                 .map(photo -> shopStorageService.getPhotoUrl(photo.getUrl()))
                 .toList();
 
         return new ModelResponse(createModelDetails(shop.getModel(), glbUrl), imageUrls);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = {"shops", "shopModels"}, key = "#shopId"),
+            @CacheEvict(value = "allShops", allEntries = true)
+    })
     @Transactional
     public void patchShop(Integer ownerId, Integer shopId, ShopUpdateRequest shopUpdateRequest) {
         Shop shop = findShopById(shopId);
@@ -162,6 +176,7 @@ public class ShopService extends BaseModelService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "shops", key = "#shopId")
     public ShopResponse getShop(Integer shopId) {
         Shop shop = findShopById(shopId);
         String logo = shopStorageService.getPhotoUrl(shop.getLogo());
@@ -169,6 +184,7 @@ public class ShopService extends BaseModelService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "allShops", key = "#id + '-' + #page + '-' + #size")
     public PageResponse<ShopResponse> getAllShops(Integer id, int page, int size) {
         Users user = userRepository.findById(id).orElse(null);
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
@@ -182,9 +198,7 @@ public class ShopService extends BaseModelService {
             shopsPage = shopRepository.findAll(pageable);
         }
 
-        List<ShopResponse> shopResponses = shopsPage.stream()
-                .map(shop -> shopMapper.toResponse(shop, shopStorageService.getPhotoUrl(shop.getLogo())))
-                .toList();
+        List<ShopResponse> shopResponses = shopsPage.map(shop -> shopMapper.toResponse(shop, shopStorageService.getPhotoUrl(shop.getLogo()))).getContent();
 
         return new PageResponse<>(
                 shopResponses,
@@ -197,6 +211,10 @@ public class ShopService extends BaseModelService {
         );
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = {"shops", "shopModels"}, key = "#shopId"),
+            @CacheEvict(value = {"allShops", "products", "productVariant"}, allEntries = true)
+    })
     @Transactional
     public void deleteShop(Integer ownerId, Integer shopId) {
         Shop shop = findShopById(shopId);
