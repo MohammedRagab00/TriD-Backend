@@ -1,6 +1,7 @@
 package com.gotrid.trid.api.cart.service;
 
 import com.gotrid.trid.api.cart.dto.CartResponse;
+import com.gotrid.trid.cache.RedisWildcardEvict;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.core.cart.mapper.CartItemMapper;
 import com.gotrid.trid.core.cart.model.Cart;
@@ -19,9 +20,7 @@ import com.gotrid.trid.core.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,9 +46,8 @@ public class CartService {
     private final CartItemMapper cartItemMapper;
     private final OrderRepository orderRepository;
 
-
     @Transactional
-    @CacheEvict(value = "userCarts", key = "#userId + '*'", beforeInvocation = true)
+    @RedisWildcardEvict(cacheName = "userCarts", keyPrefix = "#userId")
     public void addToCart(Integer variantId, Integer quantity, Integer userId) {
         Users user = getUser(userId);
         ProductVariant variant = variantRepository.findById(variantId)
@@ -89,7 +87,7 @@ public class CartService {
     }
 
     @Transactional
-    @CacheEvict(value = "userCarts", key = "#userId + '*'", beforeInvocation = true)
+    @RedisWildcardEvict(cacheName = "userCarts", keyPrefix = "#userId")
     public void removeFromCart(Integer variantId, Integer userId) {
         Users user = getUser(userId);
         ProductVariant variant = variantRepository.findById(variantId)
@@ -134,12 +132,9 @@ public class CartService {
     }
 
     @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "userCarts", key = "#id + '*'", beforeInvocation = true),
-            @CacheEvict(value = {"orderHistory", "sellerOrders"}, allEntries = true)
-    })
-    public Integer checkout(Integer id) {
-        Users user = getUser(id);
+    @RedisWildcardEvict(cacheName = "userCarts", keyPrefix = "#userId")
+    public Integer checkout(Integer userId) {
+        Users user = getUser(userId);
         Cart cart = getCart(user);
         validateCart(cart);
 
