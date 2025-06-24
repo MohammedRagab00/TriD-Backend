@@ -7,6 +7,7 @@ import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -32,7 +33,10 @@ public class ModelController {
 
     private final IModelService modelService;
 
-    @Operation(summary = "Create a new model", description = "Creates a new model (glb, images) and returns its ID")
+    @Operation(summary = "Create a new model", description = "Creates a new model (glb, images) and returns its ID",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(mediaType = MULTIPART_FORM_DATA_VALUE)
+            ))
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Shop created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input"),
