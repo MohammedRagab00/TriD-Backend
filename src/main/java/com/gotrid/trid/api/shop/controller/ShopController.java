@@ -81,7 +81,7 @@ public class ShopController {
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<Void> uploadShopModel(
             @Parameter(description = "ID of the shop") @PathVariable Integer shopId,
-            @Parameter(description = "GLB model file") @RequestParam("glb") MultipartFile glbFile,
+            @Parameter(description = "GLB model file") @RequestPart("glb") MultipartFile glbFile,
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal) {
         shopStorageService.uploadShopAssets(principal.user().getId(), shopId, glbFile);
         return ResponseEntity.ok().build();
