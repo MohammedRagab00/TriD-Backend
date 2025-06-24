@@ -10,6 +10,13 @@ spring:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+  ai:
+    openai:
+      api-key: ${AI_API_KEY}
+      base-url: ${AI_API_BASE_URL}
+      chat:
+        options:
+          model: ${AI_MODEL}
   cache:
     type: redis
   data:
