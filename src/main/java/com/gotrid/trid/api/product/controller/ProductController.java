@@ -186,7 +186,7 @@ public class ProductController {
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<Void> uploadProductFiles(
             @Parameter(description = "ID of the product") @PathVariable Integer productId,
-            @Parameter(description = "GLB model file") @RequestParam("glb") MultipartFile glbFile,
+            @Parameter(description = "GLB model file") @RequestPart("glb") MultipartFile glbFile,
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal
     ) {
         Integer ownerId = principal.user().getId();

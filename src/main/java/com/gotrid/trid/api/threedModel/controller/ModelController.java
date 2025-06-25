@@ -2,10 +2,13 @@ package com.gotrid.trid.api.threedModel.controller;
 
 import com.gotrid.trid.api.threedModel.dto.ModelResponse;
 import com.gotrid.trid.api.threedModel.dto.ModelUpdateRequest;
-import com.gotrid.trid.api.threedModel.service.ModelService;
+import com.gotrid.trid.api.threedModel.service.IModelService;
+import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.core.threedModel.dto.CoordinateDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,20 +31,23 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 @RequestMapping("/models")
 public class ModelController {
 
-    private final ModelService modelService;
+    private final IModelService modelService;
 
-    @Operation(summary = "Create a new model", description = "Creates a new model (glb, images) and returns its ID")
+    @Operation(summary = "Create a new model", description = "Creates a new model (glb, images) and returns its ID",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(mediaType = MULTIPART_FORM_DATA_VALUE)
+            ))
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Shop created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input"),
             @ApiResponse(responseCode = "403", description = "Not a seller")
     })
-    @PostMapping
+    @PostMapping(consumes = MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "Bearer Authentication")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Integer> uploadModelAssets(
-            @RequestParam("glb") MultipartFile glbFile,
-            @RequestParam(required = false, name = "images") List<MultipartFile> photoFiles
+            @RequestPart("glb") MultipartFile glbFile,
+            @RequestPart(required = false, name = "images") List<MultipartFile> photoFiles
     ) {
         Integer modelId = modelService.createModel(glbFile, photoFiles);
         return ResponseEntity.created(URI.create("/api/v1/models/" + modelId)).body(modelId);
@@ -78,6 +84,22 @@ public class ModelController {
 
         modelService.patchModel(modelId, modelUpdateRequest);
         return ResponseEntity.accepted().build();
+    }
+
+    @Operation(summary = "Get All models", description = "Retrieves all models")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Models retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Model not found")
+    })
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PageResponse<ModelResponse>> getAllModels(
+            @Parameter(description = "Page number", schema = @Schema(defaultValue = "0"))
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Items per page", schema = @Schema(defaultValue = "10"))
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(modelService.getAllModels(page, size));
     }
 
     @Operation(summary = "Get model", description = "Retrieves a specific model")
