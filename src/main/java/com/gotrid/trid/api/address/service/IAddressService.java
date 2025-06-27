@@ -1,4 +1,4 @@
-package com.gotrid.trid.api.address.services;
+package com.gotrid.trid.api.address.service;
 
 import com.gotrid.trid.api.address.dto.AddressRequest;
 import com.gotrid.trid.api.address.dto.AddressResponse;
