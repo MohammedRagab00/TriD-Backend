@@ -2,7 +2,7 @@ package com.gotrid.trid.api.address.controller;
 
 import com.gotrid.trid.api.address.dto.AddressRequest;
 import com.gotrid.trid.api.address.dto.AddressResponse;
-import com.gotrid.trid.api.address.services.IAddressService;
+import com.gotrid.trid.api.address.service.IAddressService;
 import com.gotrid.trid.config.security.userdetails.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
