@@ -17,6 +17,9 @@ spring:
       chat:
         options:
           model: ${AI_MODEL}
+    vectorstore:
+      pgvector:
+        initialize-schema: true
   cache:
     type: redis
   data:
