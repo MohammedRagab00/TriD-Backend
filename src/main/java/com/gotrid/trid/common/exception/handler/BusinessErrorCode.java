@@ -39,7 +39,7 @@ public enum BusinessErrorCode {
 
     // Shop Management
     SHOP_NAME_EXISTS(6001, CONFLICT, "Shop name already exists"),
-    UNAUTHORIZED_ACCESS(6002, FORBIDDEN, "Unauthorized shop access"),
+    UNAUTHORIZED_ACCESS(6002, FORBIDDEN, "Unauthorized"),
     SHOP_ALREADY_EXISTS(6003, CONFLICT, "You already have a shop. Only one shop per user is allowed"),
     INVALID_SOCIAL_LINK(6004, BAD_REQUEST, "Invalid social media link"),
     SHOP_ASSET_ERROR(6005, BAD_REQUEST, "Shop asset error"),
