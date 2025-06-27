@@ -1,82 +1,75 @@
 package com.gotrid.trid.api.review.service;
 
-import com.gotrid.trid.api.review.dto.ReviewDto;
+import com.gotrid.trid.api.review.dto.ReviewRequest;
+import com.gotrid.trid.api.review.dto.ReviewResponse;
+import com.gotrid.trid.common.exception.custom.UnAuthorizedException;
 import com.gotrid.trid.core.product.model.Product;
 import com.gotrid.trid.core.product.repository.ProductRepository;
+import com.gotrid.trid.core.review.mapper.ReviewMapper;
 import com.gotrid.trid.core.review.model.Review;
 import com.gotrid.trid.core.review.repository.ReviewRepository;
 import com.gotrid.trid.core.user.model.Users;
 import com.gotrid.trid.core.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Service
-public class ReviewService {
+public class ReviewService implements IReviewService {
 
-    @Autowired
-    private ReviewRepository reviewRepository;
-    @Autowired
-    private UserRepository usersRepository;
-    @Autowired
-    private ProductRepository productRepository;
+    private final ReviewRepository reviewRepository;
+    private final UserRepository usersRepository;
+    private final ProductRepository productRepository;
+    private final ReviewMapper reviewMapper;
 
-    public List<ReviewDto> getAllReviews() {
-        return reviewRepository.findAll().stream().map(this::mapToDto).collect(Collectors.toList());
+    @Override
+    public List<ReviewResponse> getAllReviews(Integer productId) {
+        return reviewRepository.findByProduct_Id(productId)
+                .stream().map(reviewMapper::toResponse).toList();
     }
 
-    public ReviewDto createReview(ReviewDto dto, Integer userId
-    ) {
+    @Override
+    public void createReview(ReviewRequest dto, Integer userId) {
         Users user = usersRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Product product = productRepository.findById(Math.toIntExact(dto.getProductId()))
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        Product product = productRepository.findById(dto.productId())
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-        Review review = new Review();
+        Review review = reviewMapper.toEntity(dto);
         review.setUser(user);
         review.setProduct(product);
-        review.setRating(dto.getRating());
-        review.setComment(dto.getComment());
 
-        review = reviewRepository.save(review);
-        return mapToDto(review);
+        reviewRepository.save(review);
     }
 
-    public ReviewDto getReviewById(Integer id) {
+    @Override
+    public void updateReview(Integer id, ReviewRequest dto, Integer userId) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
-        return mapToDto(review);
+                .orElseThrow(() -> new EntityNotFoundException("Review not found"));
+
+        isUserAuthorized(review, userId);
+
+        reviewMapper.updateExisting(dto, review);
+
+        reviewRepository.save(review);
     }
 
-    public ReviewDto updateReview(Integer id, ReviewDto dto) {
+    @Override
+    public void deleteReview(Integer id, Integer userId) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
-
-        if (dto.getRating() != null) {
-            review.setRating(dto.getRating());
-        }
-        if (dto.getComment() != null) {
-            review.setComment(dto.getComment());
-        }
-
-        return mapToDto(reviewRepository.save(review));
-    }
-
-    public void deleteReview(Integer id) {
-        Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Review not found"));
+        isUserAuthorized(review, userId);
         reviewRepository.delete(review);
     }
 
-    private ReviewDto mapToDto(Review review) {
-        ReviewDto dto = new ReviewDto();
-        dto.setUserId(review.getUser().getId());
-        dto.setProductId(review.getProduct().getId());
-        dto.setRating(review.getRating());
-        dto.setComment(review.getComment());
-        return dto;
+    private void isUserAuthorized(Review review, Integer userId) {
+        if (!review.getUser().getId().equals(userId)) {
+            throw new UnAuthorizedException("You are not authorized to modify this review");
+        }
     }
 }
