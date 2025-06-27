@@ -2,15 +2,14 @@ package com.gotrid.trid.core.address.model;
 
 import com.gotrid.trid.core.user.model.Users;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"user"})
 @Entity

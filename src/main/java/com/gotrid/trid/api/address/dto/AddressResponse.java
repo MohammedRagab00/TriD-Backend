@@ -1,26 +1,16 @@
 package com.gotrid.trid.api.address.dto;
 
-
-import lombok.Getter;
-import lombok.Setter;
-
 import java.math.BigDecimal;
 
-
 public record AddressResponse(
-        Integer userId,
+        Integer id,
         String address,
-        Coordinates coordinates,
-        Details details
+        AddressRequest.Coordinates coordinates,
+        AddressRequest.Details details
 ) {
-    public record Coordinates(
-            BigDecimal lat,
-            BigDecimal lng) {
+    public record Coordinates(BigDecimal lat, BigDecimal lng) {
     }
 
-    public record Details(String phoneNumber,
-                          String landmark) {
+    public record Details(String phoneNumber, String landmark) {
     }
 }
-
-
