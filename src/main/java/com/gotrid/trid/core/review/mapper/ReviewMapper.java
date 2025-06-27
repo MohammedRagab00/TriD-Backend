@@ -2,6 +2,7 @@ package com.gotrid.trid.core.review.mapper;
 
 import com.gotrid.trid.api.review.dto.ReviewRequest;
 import com.gotrid.trid.api.review.dto.ReviewResponse;
+import com.gotrid.trid.api.review.dto.ReviewUpdate;
 import com.gotrid.trid.core.review.model.Review;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +27,7 @@ public class ReviewMapper {
                 .build();
     }
 
-    public void updateExisting(ReviewRequest dto, Review entity) {
+    public void updateExisting(ReviewUpdate dto, Review entity) {
         entity.setRating(dto.rating());
         entity.setComment(dto.comment());
     }

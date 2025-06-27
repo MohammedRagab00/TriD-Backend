@@ -3,6 +3,7 @@ package com.gotrid.trid.api.review.controller;
 
 import com.gotrid.trid.api.review.dto.ReviewRequest;
 import com.gotrid.trid.api.review.dto.ReviewResponse;
+import com.gotrid.trid.api.review.dto.ReviewUpdate;
 import com.gotrid.trid.api.review.service.IReviewService;
 import com.gotrid.trid.config.security.userdetails.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,8 +47,8 @@ public class ReviewController {
             @RequestBody @Valid ReviewRequest dto,
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal
     ) {
-        reviewService.createReview(dto, principal.user().getId());
-        return ResponseEntity.created(URI.create("api/v1/review/" + dto.productId())).build();
+        Integer id = reviewService.createReview(dto, principal.user().getId());
+        return ResponseEntity.created(URI.create("api/v1/review/" + id)).build();
     }
 
     @Operation(summary = "Update an existing review", description = "Modify rating or comment of a review")
@@ -57,7 +58,7 @@ public class ReviewController {
             @Parameter(description = "ID of the review to update", required = true)
             @PathVariable Integer id,
             @Parameter(description = "Updated review details", required = true)
-            @RequestBody @Valid ReviewRequest dto,
+            @RequestBody @Valid ReviewUpdate dto,
             @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal
     ) {
         reviewService.updateReview(id, dto, principal.user().getId());

@@ -2,6 +2,7 @@ package com.gotrid.trid.api.review.service;
 
 import com.gotrid.trid.api.review.dto.ReviewRequest;
 import com.gotrid.trid.api.review.dto.ReviewResponse;
+import com.gotrid.trid.api.review.dto.ReviewUpdate;
 import com.gotrid.trid.common.exception.custom.UnAuthorizedException;
 import com.gotrid.trid.core.product.model.Product;
 import com.gotrid.trid.core.product.repository.ProductRepository;
@@ -33,22 +34,28 @@ public class ReviewService implements IReviewService {
     }
 
     @Override
-    public void createReview(ReviewRequest dto, Integer userId) {
+    public Integer createReview(ReviewRequest dto, Integer userId) {
+        if (dto.rating() < 1 || dto.rating() > 5) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
+        }
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
         Product product = productRepository.findById(dto.productId())
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+
+        if (reviewRepository.existsByUserAndProduct(user, product)) {
+            throw new UnAuthorizedException("You have already reviewed this product");
+        }
 
         Review review = reviewMapper.toEntity(dto);
         review.setUser(user);
         review.setProduct(product);
 
-        reviewRepository.save(review);
+        return reviewRepository.saveAndFlush(review).getId();
     }
 
     @Override
-    public void updateReview(Integer id, ReviewRequest dto, Integer userId) {
+    public void updateReview(Integer id, ReviewUpdate dto, Integer userId) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Review not found"));
 

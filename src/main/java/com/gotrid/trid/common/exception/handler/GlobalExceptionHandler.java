@@ -315,12 +315,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UnAuthorizedException.class)
     public ResponseEntity<ExceptionResponse> handleUnauthorizedShopAccessException(UnAuthorizedException ex) {
-        log.warn("Unauthorized access to shop: {}", ex.getMessage());
         return buildErrorResponse(
                 UNAUTHORIZED_ACCESS,
                 ex.getMessage(),
                 null,
-                Map.of("shop", "You don't have permission to modify this shop")
+                Map.of("err", "You are not authorized to do this action")
         );
     }
 
