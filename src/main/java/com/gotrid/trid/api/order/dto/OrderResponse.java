@@ -9,6 +9,6 @@ public record OrderResponse(
         Integer orderId,
         BigDecimal total_amount,
         Status status,
-        Set<Integer> orderItems
+        Set<OrderItemResponse> orderItems
 ) {
 }

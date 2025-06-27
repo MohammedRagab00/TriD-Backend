@@ -1,5 +1,6 @@
 package com.gotrid.trid.core.order.mapper;
 
+import com.gotrid.trid.api.order.dto.OrderItemResponse;
 import com.gotrid.trid.api.order.dto.OrderResponse;
 import com.gotrid.trid.core.order.model.Order;
 import org.springframework.stereotype.Component;
@@ -17,8 +18,12 @@ public class OrderMapper implements Function<Order, OrderResponse> {
                 order.getTotal_amount(),
                 order.getStatus(),
                 order.getOrderItems().stream()
-                        .map(item -> item.getVariant().getId())
-                        .collect(Collectors.toSet())
+                        .map(item ->
+                                new OrderItemResponse(
+                                        item.getVariant().getProduct().getId(),
+                                        item.getVariant().getId()
+                                )
+                        ).collect(Collectors.toSet())
         );
     }
 }
