@@ -4,7 +4,10 @@ package com.gotrid.trid.api.review.controller;
 import com.gotrid.trid.api.review.dto.ReviewRequest;
 import com.gotrid.trid.api.review.dto.ReviewResponse;
 import com.gotrid.trid.api.review.dto.ReviewUpdate;
+import com.gotrid.trid.api.review.dto.ReviewWithUserCheckResponse;
 import com.gotrid.trid.api.review.service.IReviewService;
+import com.gotrid.trid.api.user.dto.UserProfileResponse;
+import com.gotrid.trid.api.user.service.UserService;
 import com.gotrid.trid.config.security.userdetails.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,16 +32,30 @@ import java.util.List;
 public class ReviewController {
 
     private final IReviewService reviewService;
+    private final UserService userService;
 
     @Operation(summary = "Get all reviews", description = "Fetch a list of all reviews for a specific product")
     @ApiResponse(responseCode = "200", description = "List of reviews retrieved successfully")
     @GetMapping("/{productId}")
-    public List<ReviewResponse> getAll(
+    public ResponseEntity<?> getAll(
             @PathVariable Integer productId
     ) {
-        return reviewService.getAllReviews(productId);
+        return (ResponseEntity<?>) reviewService.getAllReviews(productId);
     }
 
+    @Operation(summary = "Get all reviews", description = "Fetch a list of all reviews for a specific product")
+    @ApiResponse(responseCode = "200", description = "List of reviews retrieved successfully")
+    @GetMapping("/{productId}")
+    public ReviewWithUserCheckResponse getAll(
+            @PathVariable Integer productId,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        List<ReviewResponse> reviews = reviewService.getAllReviews(productId);
+        UserProfileResponse username = userService.getUserProfile(principal.user().getEmail());
+        boolean hasReviewed = reviewService.existsByProductIdAndUserId(productId, principal.user().getId());
+
+        return new ReviewWithUserCheckResponse(reviews, username, hasReviewed);
+    }
     @Operation(summary = "Create a new review", description = "Add a new review for a product")
     @ApiResponse(responseCode = "201", description = "Review created successfully")
     @PostMapping
