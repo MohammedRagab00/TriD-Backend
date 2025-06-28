@@ -9,6 +9,7 @@ import com.gotrid.trid.core.order.mapper.OrderItemMapper;
 import com.gotrid.trid.core.order.mapper.OrderMapper;
 import com.gotrid.trid.core.order.model.Order;
 import com.gotrid.trid.core.order.model.OrderItem;
+import com.gotrid.trid.core.order.model.Status;
 import com.gotrid.trid.core.order.repository.OrderItemRepository;
 import com.gotrid.trid.core.order.repository.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -101,5 +102,22 @@ public class OrderService {
         order.setStatus(request.newStatus());
         orderRepository.save(order);
     }
+    @Transactional
+    public void cancelOrder(Integer userId, Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        if (!order.getCustomer().getId().equals(userId)) {
+            throw new UnAuthorizedException("You are not authorized to cancel this order");
+        }
+
+        if (order.getStatus() != Status.PENDING && order.getStatus() != Status.PROCESSING) {
+            throw new IllegalStateException("You can only cancel orders that are pending or processing");
+        }
+
+        order.setStatus(Status.CANCELLED);
+        orderRepository.save(order);
+    }
+
 
 }

@@ -74,4 +74,16 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Cancel Order", description = "Allow the user to cancel an order")
+    @PutMapping("/{orderId}/cancel")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Void> cancelOrder(
+            @PathVariable Integer orderId,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        orderService.cancelOrder(principal.user().getId(), orderId);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }
