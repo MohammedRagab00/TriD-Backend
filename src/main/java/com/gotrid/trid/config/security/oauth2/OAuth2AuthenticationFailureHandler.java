@@ -18,7 +18,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
             AuthenticationException exception
     ) throws IOException {
         //todo
-        String targetUrl = String.format("https://trid-go.vercel.app/auth/oauth2/redirect?error=%s", 
+        String targetUrl = String.format("https://go-trid.vercel.app/auth/oauth2/redirect?error=%s",
                 exception.getLocalizedMessage());
         
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
