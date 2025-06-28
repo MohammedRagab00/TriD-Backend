@@ -2,6 +2,7 @@ package com.gotrid.trid.api.order.controller;
 
 import com.gotrid.trid.api.order.dto.OrderResponse;
 import com.gotrid.trid.api.order.dto.OrderSellerResponse;
+import com.gotrid.trid.api.order.dto.UpdateStatusRequest;
 import com.gotrid.trid.api.order.service.OrderService;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.config.security.userdetails.UserPrincipal;
@@ -62,4 +63,27 @@ public class OrderController {
     ) {
         return ResponseEntity.ok(orderService.getSellerOrders(principal.user().getId(), page, size));
     }
+    @Operation(summary = "Update Order Status", description = "Update the status of an order by a seller")
+    @PutMapping("/status")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<Void> updateOrderStatus(
+            @RequestBody UpdateStatusRequest request,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        orderService.updateOrderStatus(principal.user().getId(), request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Cancel Order", description = "Allow the user to cancel an order")
+    @PutMapping("/{orderId}/cancel")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Void> cancelOrder(
+            @PathVariable Integer orderId,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        orderService.cancelOrder(principal.user().getId(), orderId);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

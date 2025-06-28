@@ -2,12 +2,14 @@ package com.gotrid.trid.api.order.service;
 
 import com.gotrid.trid.api.order.dto.OrderResponse;
 import com.gotrid.trid.api.order.dto.OrderSellerResponse;
+import com.gotrid.trid.api.order.dto.UpdateStatusRequest;
 import com.gotrid.trid.common.exception.custom.UnAuthorizedException;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.core.order.mapper.OrderItemMapper;
 import com.gotrid.trid.core.order.mapper.OrderMapper;
 import com.gotrid.trid.core.order.model.Order;
 import com.gotrid.trid.core.order.model.OrderItem;
+import com.gotrid.trid.core.order.model.Status;
 import com.gotrid.trid.core.order.repository.OrderItemRepository;
 import com.gotrid.trid.core.order.repository.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.List;
 
@@ -84,4 +87,37 @@ public class OrderService {
                 orderItemsPage.isLast()
         );
     }
+    @Transactional
+    public void updateOrderStatus(Integer sellerId, UpdateStatusRequest request) {
+        Order order = orderRepository.findById(request.orderId())
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        boolean isSellerAuthorized = order.getOrderItems().stream()
+                .anyMatch(item -> item.getVariant().getProduct().getShop().getOwner().getId().equals(sellerId));
+
+        if (!isSellerAuthorized) {
+            throw new UnAuthorizedException("You are not authorized to update this order");
+        }
+
+        order.setStatus(request.newStatus());
+        orderRepository.save(order);
+    }
+    @Transactional
+    public void cancelOrder(Integer userId, Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        if (!order.getCustomer().getId().equals(userId)) {
+            throw new UnAuthorizedException("You are not authorized to cancel this order");
+        }
+
+        if (order.getStatus() != Status.PENDING && order.getStatus() != Status.PROCESSING) {
+            throw new IllegalStateException("You can only cancel orders that are pending or processing");
+        }
+
+        order.setStatus(Status.CANCELLED);
+        orderRepository.save(order);
+    }
+
+
 }
