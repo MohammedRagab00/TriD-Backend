@@ -8,15 +8,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ReviewMapper {
-    public ReviewResponse toResponse(Review review) {
+    public ReviewResponse toResponse(Review review, boolean canEdit) {
         return new ReviewResponse(
                 review.getId(),
-                review.getUser().getId(),
+                review.getUser().getName(),
                 review.getProduct().getId(),
                 review.getRating(),
                 review.getComment(),
                 review.getCreatedDate(),
-                review.getLastModifiedDate()
+                review.getLastModifiedDate(),
+                canEdit
         );
     }
 

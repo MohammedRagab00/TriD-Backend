@@ -4,11 +4,12 @@ import java.time.LocalDateTime;
 
 public record ReviewResponse(
         Integer id,
-        Integer userId,
+        String name,
         Integer productId,
         Short rating,
         String comment,
         LocalDateTime reviewedAt,
-        LocalDateTime lastModifiedAt
+        LocalDateTime lastModifiedAt,
+        boolean canEdit
 ) {
 }
