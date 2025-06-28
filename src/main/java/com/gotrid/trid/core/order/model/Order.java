@@ -38,4 +38,15 @@ public class Order extends AuditableEntity {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
     private Set<OrderItem> orderItems = new HashSet<>();
+
+    @Column(length = 200)
+    private String address;
+    @Column(precision = 9, scale = 6, nullable = false)
+    BigDecimal latitude;
+    @Column(precision = 9, scale = 6, nullable = false)
+    BigDecimal longitude;
+    @Column(length = 10)
+    private String phone_number;
+    @Column(length = 100)
+    private String landmark;
 }

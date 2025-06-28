@@ -3,6 +3,8 @@ package com.gotrid.trid.api.cart.service;
 import com.gotrid.trid.api.cart.dto.CartResponse;
 import com.gotrid.trid.cache.RedisWildcardEvict;
 import com.gotrid.trid.common.response.PageResponse;
+import com.gotrid.trid.core.address.model.Address;
+import com.gotrid.trid.core.address.repository.AddressRepository;
 import com.gotrid.trid.core.cart.mapper.CartItemMapper;
 import com.gotrid.trid.core.cart.model.Cart;
 import com.gotrid.trid.core.cart.model.CartItem;
@@ -45,6 +47,7 @@ public class CartService {
     private final ProductVariantRepository variantRepository;
     private final CartItemMapper cartItemMapper;
     private final OrderRepository orderRepository;
+    private final AddressRepository addressRepository;
 
     @Transactional
     @RedisWildcardEvict(cacheName = "userCarts", keyPrefix = "#userId")
@@ -135,10 +138,13 @@ public class CartService {
     @RedisWildcardEvict(cacheName = "userCarts", keyPrefix = "#userId")
     public Integer checkout(Integer userId) {
         Users user = getUser(userId);
+        Address address = addressRepository.findByUser(user)
+                .orElseThrow(() -> new EntityNotFoundException("Address not found for user with id: " + userId));
         Cart cart = getCart(user);
         validateCart(cart);
 
         Order order = new Order();
+        addAddressToOrder(address, order);
         order.setCustomer(user);
         order.setStatus(PENDING);
 
@@ -181,5 +187,13 @@ public class CartService {
     private Cart getCart(Users user) {
         return cartRepository.findByUser(user)
                 .orElseThrow(() -> new EntityNotFoundException("Cart not found"));
+    }
+
+    private void addAddressToOrder(Address address, Order order) {
+        order.setAddress(address.getAddress());
+        order.setLatitude(address.getLatitude());
+        order.setLongitude(address.getLongitude());
+        order.setPhone_number(address.getPhone_number());
+        order.setLandmark(address.getLandmark());
     }
 }

@@ -54,7 +54,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String fullName = extractedData.firstName() + " " + extractedData.lastName();
         String jwtToken = jwtService.generateToken(Map.of("fullName", fullName), customUser);
 
-        String targetUrl = String.format("https://trid-go.vercel.app/auth/oauth2/redirect?token=%s&email=%s&name=%s&provider=%s",
+        String targetUrl = String.format("https://go-trid.vercel.app/auth/oauth2/redirect?token=%s&email=%s&name=%s&provider=%s",
                 jwtToken,
                 extractedData.email(),
                 fullName,

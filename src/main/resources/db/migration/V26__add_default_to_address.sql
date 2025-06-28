@@ -1,0 +1,2 @@
+ALTER TABLE addresses
+    ADD COLUMN is_default BOOLEAN DEFAULT FALSE NOT NULL;
