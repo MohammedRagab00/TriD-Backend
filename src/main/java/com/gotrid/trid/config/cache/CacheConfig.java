@@ -43,7 +43,6 @@ public class CacheConfig {
         // Low-frequency, large objects (5 MB)
         cacheConfigurations.put("shopModels", createCacheConfig(Duration.ofHours(1), 100));
         cacheConfigurations.put("productImages", createCacheConfig(Duration.ofHours(2), 200));
-        cacheConfigurations.put("orderHistory", createCacheConfig(Duration.ofMinutes(10), 1_000));
         cacheConfigurations.put("sellerOrders", createCacheConfig(Duration.ofMinutes(8), 800));
 
 

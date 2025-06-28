@@ -34,9 +34,6 @@ public class OrderService {
     private final OrderItemMapper orderItemMapper;
     private final OrderItemRepository itemRepository;
 
-    @Cacheable(value = "orderHistory", key = "#userId + '-' + #page + '-' + #size",
-            condition = "#size <= 20",
-            unless = "#result.content.isEmpty()")
     public PageResponse<OrderResponse> getOrders(Integer userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
 
