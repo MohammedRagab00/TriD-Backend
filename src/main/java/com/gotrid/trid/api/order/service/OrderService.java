@@ -2,6 +2,7 @@ package com.gotrid.trid.api.order.service;
 
 import com.gotrid.trid.api.order.dto.OrderResponse;
 import com.gotrid.trid.api.order.dto.OrderSellerResponse;
+import com.gotrid.trid.api.order.dto.UpdateStatusRequest;
 import com.gotrid.trid.common.exception.custom.UnAuthorizedException;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.core.order.mapper.OrderItemMapper;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.List;
 
@@ -84,4 +86,20 @@ public class OrderService {
                 orderItemsPage.isLast()
         );
     }
+    @Transactional
+    public void updateOrderStatus(Integer sellerId, UpdateStatusRequest request) {
+        Order order = orderRepository.findById(request.orderId())
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        boolean isSellerAuthorized = order.getOrderItems().stream()
+                .anyMatch(item -> item.getVariant().getProduct().getShop().getOwner().getId().equals(sellerId));
+
+        if (!isSellerAuthorized) {
+            throw new UnAuthorizedException("You are not authorized to update this order");
+        }
+
+        order.setStatus(request.newStatus());
+        orderRepository.save(order);
+    }
+
 }
