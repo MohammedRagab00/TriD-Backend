@@ -2,7 +2,6 @@ package com.gotrid.trid.api.review.controller;
 
 
 import com.gotrid.trid.api.review.dto.ReviewRequest;
-import com.gotrid.trid.api.review.dto.ReviewResponse;
 import com.gotrid.trid.api.review.dto.ReviewUpdate;
 import com.gotrid.trid.api.review.service.IReviewService;
 import com.gotrid.trid.config.security.userdetails.UserPrincipal;
@@ -19,7 +18,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 @Tag(name = "Review", description = "Review management API")
 @SecurityRequirement(name = "Bearer Authentication")
@@ -33,10 +31,11 @@ public class ReviewController {
     @Operation(summary = "Get all reviews", description = "Fetch a list of all reviews for a specific product")
     @ApiResponse(responseCode = "200", description = "List of reviews retrieved successfully")
     @GetMapping("/{productId}")
-    public List<ReviewResponse> getAll(
-            @PathVariable Integer productId
+    public ResponseEntity<?> getAll(
+            @PathVariable Integer productId,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal principal
     ) {
-        return reviewService.getAllReviews(productId);
+        return ResponseEntity.ok(reviewService.getAllReviews(productId, principal.user().getId()));
     }
 
     @Operation(summary = "Create a new review", description = "Add a new review for a product")

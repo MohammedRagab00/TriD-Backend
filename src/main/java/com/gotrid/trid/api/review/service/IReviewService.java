@@ -7,7 +7,7 @@ import com.gotrid.trid.api.review.dto.ReviewUpdate;
 import java.util.List;
 
 public interface IReviewService {
-    List<ReviewResponse> getAllReviews(Integer productId);
+    List<ReviewResponse> getAllReviews(Integer productId, Integer userId);
 
     Integer createReview(ReviewRequest dto, Integer userId);
 

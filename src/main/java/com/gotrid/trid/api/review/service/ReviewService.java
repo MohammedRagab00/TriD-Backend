@@ -28,9 +28,11 @@ public class ReviewService implements IReviewService {
     private final ReviewMapper reviewMapper;
 
     @Override
-    public List<ReviewResponse> getAllReviews(Integer productId) {
+    public List<ReviewResponse> getAllReviews(Integer productId, Integer userId) {
         return reviewRepository.findByProduct_Id(productId)
-                .stream().map(reviewMapper::toResponse).toList();
+                .stream().map(review -> reviewMapper.toResponse(review,
+                        userId.equals(review.getUser().getId())
+                )).toList();
     }
 
     @Override
