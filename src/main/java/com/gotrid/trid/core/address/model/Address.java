@@ -30,4 +30,6 @@ public class Address {
     private String phone_number;
     @Column(length = 100)
     private String landmark;
+    @Column(nullable = false)
+    private boolean isDefault;
 }

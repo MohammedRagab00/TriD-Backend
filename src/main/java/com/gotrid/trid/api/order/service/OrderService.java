@@ -22,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.List;
 
@@ -87,6 +86,7 @@ public class OrderService {
                 orderItemsPage.isLast()
         );
     }
+
     @Transactional
     public void updateOrderStatus(Integer sellerId, UpdateStatusRequest request) {
         Order order = orderRepository.findById(request.orderId())
@@ -102,6 +102,7 @@ public class OrderService {
         order.setStatus(request.newStatus());
         orderRepository.save(order);
     }
+
     @Transactional
     public void cancelOrder(Integer userId, Integer orderId) {
         Order order = orderRepository.findById(orderId)
@@ -118,6 +119,5 @@ public class OrderService {
         order.setStatus(Status.CANCELLED);
         orderRepository.save(order);
     }
-
 
 }
