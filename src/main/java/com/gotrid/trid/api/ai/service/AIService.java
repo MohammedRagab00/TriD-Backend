@@ -6,7 +6,6 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -55,9 +54,10 @@ public class AIService {
             """;
 
     public String getAssistantReply(String prompt) {
-        List<Message> conversation = new ArrayList<>();
-        conversation.add(new SystemMessage(systemPrompt));
-        conversation.add(new UserMessage(prompt));
+        List<Message> conversation = List.of(
+                new SystemMessage(systemPrompt),
+                new UserMessage(prompt)
+        );
 
         return chatClient.prompt()
                 .messages(conversation)

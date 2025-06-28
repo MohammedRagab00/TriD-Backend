@@ -20,7 +20,10 @@ public class ApplicationAuditAware implements AuditorAware<Integer> {
         ) {
             return Optional.empty();
         }
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        return Optional.of(userPrincipal.user().getId());
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserPrincipal userPrincipal) {
+            return Optional.of(userPrincipal.user().getId());
+        }
+        return Optional.empty();
     }
 }

@@ -36,7 +36,7 @@ public class AIController {
 
     @PostMapping("/respond")
     public ResponseEntity<String> suggestRecipe(
-            @RequestParam(name = "message", defaultValue = "Tell me more about yourself")
+            @RequestParam(name = "message")
             String message
     ) {
         return ResponseEntity.ok(aiService.getAssistantReply(message));

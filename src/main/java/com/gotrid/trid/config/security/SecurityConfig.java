@@ -2,6 +2,8 @@ package com.gotrid.trid.config.security;
 
 import com.gotrid.trid.config.security.jwt.JwtExceptionHandlerFilter;
 import com.gotrid.trid.config.security.jwt.JwtFilter;
+import com.gotrid.trid.config.security.oauth2.OAuth2AuthenticationFailureHandler;
+import com.gotrid.trid.config.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +33,8 @@ public class SecurityConfig {
     private final JwtFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final JwtExceptionHandlerFilter jwtExceptionHandlerFilter;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -43,6 +47,8 @@ public class SecurityConfig {
                         req
                                 .requestMatchers(
                                         "/auth/**",
+                                        "/oauth2/**",
+                                        "/login/oauth2/**",
                                         "/models/*",
                                         "/v3/api-docs",
                                         "/v3/api-docs/**",
@@ -59,6 +65,10 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(STATELESS)
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                        .failureHandler(oAuth2AuthenticationFailureHandler)
                 )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtExceptionHandlerFilter, UsernamePasswordAuthenticationFilter.class)

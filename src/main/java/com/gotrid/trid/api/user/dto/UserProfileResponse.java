@@ -9,9 +9,7 @@ public record UserProfileResponse(
         String lastName,
         String email,
         Gender gender,
-        int age,
         LocalDate birthDate,
         String photoUrl
-
 ) {
 }
