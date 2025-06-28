@@ -36,7 +36,7 @@ public class ReviewController {
 
     @Operation(summary = "Get all reviews", description = "Fetch a list of all reviews for a specific product")
     @ApiResponse(responseCode = "200", description = "List of reviews retrieved successfully")
-    @GetMapping("/{productId}")
+    @GetMapping("all/{productId}")
     public ResponseEntity<?> getAll(
             @PathVariable Integer productId
     ) {
