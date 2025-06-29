@@ -1,5 +1,6 @@
 package com.gotrid.trid.api.user.controller;
 
+import com.gotrid.trid.api.user.dto.DashboardStatsDto;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.api.user.dto.UserSearchResponse;
 import com.gotrid.trid.api.user.service.AdminService;
@@ -25,6 +26,7 @@ import java.util.Set;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
     private final AdminService adminService;
+
 
     @Operation(summary = "Search users by email", description = "Search for users whose email contains the given pattern")
     @ApiResponses({
@@ -56,5 +58,16 @@ public class AdminController {
             @RequestBody Set<String> roles
     ) {
         return ResponseEntity.ok(adminService.updateUserRoles(id, roles));
+    }
+
+
+    @Operation(
+            summary = "Get dashboard statistics",
+            description = "Returns total users, orders, revenue, and net profit"
+    )
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved statistics")
+    @GetMapping("dashboard/stats")
+    public DashboardStatsDto getStats() {
+        return adminService.getStats();
     }
 }
