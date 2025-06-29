@@ -1,6 +1,7 @@
 package com.gotrid.trid.api.user.controller;
 
 import com.gotrid.trid.api.user.dto.DashboardStatsDto;
+import com.gotrid.trid.api.user.dto.RecentOrderDto;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.api.user.dto.UserSearchResponse;
 import com.gotrid.trid.api.user.service.AdminService;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -66,8 +68,13 @@ public class AdminController {
             description = "Returns total users, orders, revenue, and net profit"
     )
     @ApiResponse(responseCode = "200", description = "Successfully retrieved statistics")
-    @GetMapping("dashboard/stats")
+    @GetMapping("/dashboard/stats")
     public DashboardStatsDto getStats() {
         return adminService.getStats();
+    }
+    @Operation(summary = "Get recent orders", description = "Returns the latest 10 orders")
+    @GetMapping("/dashboard/recent-orders")
+    public List<RecentOrderDto> getRecentOrders() {
+        return adminService.getRecentOrders();
     }
 }

@@ -1,6 +1,7 @@
 package com.gotrid.trid.api.user.service;
 
 import com.gotrid.trid.api.user.dto.DashboardStatsDto;
+import com.gotrid.trid.api.user.dto.RecentOrderDto;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.core.order.repository.OrderRepository;
 import com.gotrid.trid.core.user.model.Users;
@@ -68,6 +69,7 @@ public class AdminService {
         Users savedUser = userRepository.save(user);
         return userMapper.toSearchResponse(savedUser);
     }
+
     public DashboardStatsDto getStats() {
         int totalUsers = (int) userRepository.count();
         int totalOrders = (int) orderRepository.count();
@@ -76,5 +78,9 @@ public class AdminService {
         BigDecimal netProfit = totalRevenue.multiply(new BigDecimal("0.2")); // مثال: 20% نسبة ربح
 
         return new DashboardStatsDto(totalUsers, totalOrders, totalRevenue, netProfit);
+    }
+
+    public List<RecentOrderDto> getRecentOrders() {
+        return orderRepository.findTop10RecentOrders();
     }
 }
