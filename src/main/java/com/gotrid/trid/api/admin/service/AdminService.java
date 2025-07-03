@@ -1,13 +1,13 @@
-package com.gotrid.trid.api.user.service;
+package com.gotrid.trid.api.admin.service;
 
-import com.gotrid.trid.api.user.dto.DashboardStatsDto;
-import com.gotrid.trid.api.user.dto.RecentOrderDto;
+import com.gotrid.trid.api.admin.dto.DashboardStatsDto;
+import com.gotrid.trid.api.admin.dto.RecentOrderDto;
+import com.gotrid.trid.api.admin.dto.UserSearchResponse;
 import com.gotrid.trid.common.response.PageResponse;
 import com.gotrid.trid.core.order.repository.OrderRepository;
-import com.gotrid.trid.core.user.model.Users;
-import com.gotrid.trid.api.user.dto.UserSearchResponse;
 import com.gotrid.trid.core.user.mapper.UserMapper;
 import com.gotrid.trid.core.user.model.Role;
+import com.gotrid.trid.core.user.model.Users;
 import com.gotrid.trid.core.user.repository.RoleRepository;
 import com.gotrid.trid.core.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,12 +28,13 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Service
-public class AdminService {
+public class AdminService implements IAdminService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final OrderRepository orderRepository;
     private final RoleRepository roleRepository;
 
+    @Override
     @Cacheable(value = "users", key = "#email + '-' + #page + '-' + #size")
     public PageResponse<UserSearchResponse> searchUserByEmail(String email, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
@@ -52,6 +53,7 @@ public class AdminService {
         );
     }
 
+    @Override
     @Transactional
     public UserSearchResponse updateUserRoles(Integer id, Set<String> roleNames) {
         Users user = userRepository.findById(id)
@@ -70,17 +72,19 @@ public class AdminService {
         return userMapper.toSearchResponse(savedUser);
     }
 
+    @Override
     public DashboardStatsDto getStats() {
-        int totalUsers = (int) userRepository.count();
-        int totalOrders = (int) orderRepository.count();
+        long totalUsers = userRepository.count();
+        long totalOrders = orderRepository.count();
 
-        BigDecimal totalRevenue = orderRepository.sumTotalAmount(); // لازم تعمل query مخصوص
-        BigDecimal netProfit = totalRevenue.multiply(new BigDecimal("0.2")); // مثال: 20% نسبة ربح
+        BigDecimal totalRevenue = orderRepository.sumTotalAmount();
+        BigDecimal netProfit = totalRevenue.multiply(new BigDecimal("0.2")); //* example: assuming 20% profit margin
 
         return new DashboardStatsDto(totalUsers, totalOrders, totalRevenue, netProfit);
     }
 
+    @Override
     public List<RecentOrderDto> getRecentOrders() {
-        return orderRepository.findTop10RecentOrders();
+        return orderRepository.getRecentOrders(PageRequest.of(0, 10, Sort.by("createdDate").descending()));
     }
 }

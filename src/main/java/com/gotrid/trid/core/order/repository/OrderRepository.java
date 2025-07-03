@@ -1,6 +1,6 @@
 package com.gotrid.trid.core.order.repository;
 
-import com.gotrid.trid.api.user.dto.RecentOrderDto;
+import com.gotrid.trid.api.admin.dto.RecentOrderDto;
 import com.gotrid.trid.core.order.model.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,14 +17,11 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     BigDecimal sumTotalAmount();
 
     @Query("""
-        SELECT new com.gotrid.trid.api.user.dto.RecentOrderDto(
-            o.id, u.firstname
-                    , o.total_amount, o.createdDate
-        )
-        FROM Order o
-        JOIN o.customer u
-        ORDER BY o.createdDate DESC
-        """)
-    List<RecentOrderDto> findTop10RecentOrders();
-
+            SELECT new com.gotrid.trid.api.admin.dto.RecentOrderDto(
+                o.id, u.firstname, o.total_amount, o.createdDate
+            )
+            FROM Order o
+            JOIN o.customer u
+            """)
+    List<RecentOrderDto> getRecentOrders(Pageable pageable);
 }

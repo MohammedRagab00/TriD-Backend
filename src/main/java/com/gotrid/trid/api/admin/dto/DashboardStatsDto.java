@@ -1,12 +1,12 @@
-package com.gotrid.trid.api.user.dto;
+package com.gotrid.trid.api.admin.dto;
 
 
 import java.math.BigDecimal;
 
 public record DashboardStatsDto(
-        int totalUsers,
-        int totalOrders,
+        long totalNumOfUsers,
+        long totalNumOfOrders,
         BigDecimal totalRevenue,
         BigDecimal netProfit
-) {}
-
+) {
+}

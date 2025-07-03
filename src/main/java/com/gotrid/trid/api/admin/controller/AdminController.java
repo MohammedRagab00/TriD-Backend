@@ -1,10 +1,10 @@
-package com.gotrid.trid.api.user.controller;
+package com.gotrid.trid.api.admin.controller;
 
-import com.gotrid.trid.api.user.dto.DashboardStatsDto;
-import com.gotrid.trid.api.user.dto.RecentOrderDto;
+import com.gotrid.trid.api.admin.dto.UserSearchResponse;
+import com.gotrid.trid.api.admin.service.IAdminService;
+import com.gotrid.trid.api.admin.dto.DashboardStatsDto;
+import com.gotrid.trid.api.admin.dto.RecentOrderDto;
 import com.gotrid.trid.common.response.PageResponse;
-import com.gotrid.trid.api.user.dto.UserSearchResponse;
-import com.gotrid.trid.api.user.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -27,8 +27,7 @@ import java.util.Set;
 @SecurityRequirement(name = "Bearer Authentication")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
-    private final AdminService adminService;
-
+    private final IAdminService adminService;
 
     @Operation(summary = "Search users by email", description = "Search for users whose email contains the given pattern")
     @ApiResponses({
@@ -72,6 +71,7 @@ public class AdminController {
     public DashboardStatsDto getStats() {
         return adminService.getStats();
     }
+
     @Operation(summary = "Get recent orders", description = "Returns the latest 10 orders")
     @GetMapping("/dashboard/recent-orders")
     public List<RecentOrderDto> getRecentOrders() {
