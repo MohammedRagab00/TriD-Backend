@@ -3,7 +3,7 @@ package com.gotrid.trid.core.user.mapper;
 import com.gotrid.trid.infrastructure.azure.ProfilePhotoService;
 import com.gotrid.trid.core.user.model.Users;
 import com.gotrid.trid.api.user.dto.UserProfileResponse;
-import com.gotrid.trid.api.user.dto.UserSearchResponse;
+import com.gotrid.trid.api.admin.dto.UserSearchResponse;
 import com.gotrid.trid.core.user.model.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

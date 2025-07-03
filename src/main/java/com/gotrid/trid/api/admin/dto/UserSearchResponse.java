@@ -1,4 +1,4 @@
-package com.gotrid.trid.api.user.dto;
+package com.gotrid.trid.api.admin.dto;
 
 import java.util.Set;
 
