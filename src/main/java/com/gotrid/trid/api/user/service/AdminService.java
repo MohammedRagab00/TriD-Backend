@@ -1,6 +1,9 @@
 package com.gotrid.trid.api.user.service;
 
+import com.gotrid.trid.api.user.dto.DashboardStatsDto;
+import com.gotrid.trid.api.user.dto.RecentOrderDto;
 import com.gotrid.trid.common.response.PageResponse;
+import com.gotrid.trid.core.order.repository.OrderRepository;
 import com.gotrid.trid.core.user.model.Users;
 import com.gotrid.trid.api.user.dto.UserSearchResponse;
 import com.gotrid.trid.core.user.mapper.UserMapper;
@@ -18,6 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,6 +31,7 @@ import java.util.stream.Collectors;
 public class AdminService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final OrderRepository orderRepository;
     private final RoleRepository roleRepository;
 
     @Cacheable(value = "users", key = "#email + '-' + #page + '-' + #size")
@@ -63,5 +68,19 @@ public class AdminService {
         user.setRoles(roles);
         Users savedUser = userRepository.save(user);
         return userMapper.toSearchResponse(savedUser);
+    }
+
+    public DashboardStatsDto getStats() {
+        int totalUsers = (int) userRepository.count();
+        int totalOrders = (int) orderRepository.count();
+
+        BigDecimal totalRevenue = orderRepository.sumTotalAmount(); // لازم تعمل query مخصوص
+        BigDecimal netProfit = totalRevenue.multiply(new BigDecimal("0.2")); // مثال: 20% نسبة ربح
+
+        return new DashboardStatsDto(totalUsers, totalOrders, totalRevenue, netProfit);
+    }
+
+    public List<RecentOrderDto> getRecentOrders() {
+        return orderRepository.findTop10RecentOrders();
     }
 }
