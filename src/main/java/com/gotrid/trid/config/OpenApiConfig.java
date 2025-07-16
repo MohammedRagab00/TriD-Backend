@@ -24,7 +24,7 @@ public class OpenApiConfig {
                         )
                 )
                 .info(new Info()
-                        .title("Ya Rab Fok El Day'a")
+                        .title("TriD RESTFul API – Spring Boot Service")
                         .description("API for managing TriD")
                         .version("1.0")
                         .contact(new Contact()
