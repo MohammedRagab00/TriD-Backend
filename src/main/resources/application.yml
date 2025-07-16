@@ -73,7 +73,7 @@ application:
         expiration-days: ${EXPIRATION_DAYS}
   mailing:
     frontend:
-      url: https://trid-go.vercel.app
+      url: https://go-trid.vercel.app
 springdoc:
   default-produces-media-type: application/json
 server:
