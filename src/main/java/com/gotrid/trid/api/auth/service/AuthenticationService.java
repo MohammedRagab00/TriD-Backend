@@ -61,7 +61,7 @@ public class AuthenticationService {
     private final TransactionTemplate transactionTemplate;
     private final RefreshTokenService refreshTokenService;
     @Value("${application.mailing.frontend.url}")
-    private String Url;
+    private String URL;
 
     public void register(RegistrationRequest request) throws MessagingException {
         String normalizedEmail = request.email().toLowerCase();
@@ -110,7 +110,7 @@ public class AuthenticationService {
                 user.getEmail(),
                 user.getName(),
                 ACTIVATE_ACCOUNT,
-                Url + "/activate-account?token=" + newToken,
+                URL + "/activate-account?token=" + newToken,
                 newToken
         );
     }
@@ -249,7 +249,7 @@ public class AuthenticationService {
                 user.getEmail(),
                 user.getName(),
                 RESET_PASSWORD,
-                Url + "/reset-password?token=" + token,
+                URL + "/reset-password?token=" + token,
                 token
         );
     }
