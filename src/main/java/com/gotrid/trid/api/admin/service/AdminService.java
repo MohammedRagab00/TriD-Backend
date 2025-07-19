@@ -8,10 +8,11 @@ import com.gotrid.trid.core.order.repository.OrderRepository;
 import com.gotrid.trid.core.user.mapper.UserMapper;
 import com.gotrid.trid.core.user.model.Role;
 import com.gotrid.trid.core.user.model.Users;
-import com.gotrid.trid.core.user.repository.RoleRepository;
+import com.gotrid.trid.core.user.repository.IRoleRepository;
 import com.gotrid.trid.core.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +33,8 @@ public class AdminService implements IAdminService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final OrderRepository orderRepository;
-    private final RoleRepository roleRepository;
+    @Qualifier("jpa")
+    private final IRoleRepository roleRepository;
 
     @Override
     @Cacheable(value = "users", key = "#email + '-' + #page + '-' + #size")

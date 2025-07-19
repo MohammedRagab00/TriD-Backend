@@ -1,7 +1,8 @@
 package com.gotrid.trid;
 
 import com.gotrid.trid.core.user.model.Role;
-import com.gotrid.trid.core.user.repository.RoleRepository;
+import com.gotrid.trid.core.user.repository.IRoleRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,13 +23,14 @@ public class TriDApplication {
 
 //    @Bean
     public CommandLineRunner runner(
-            RoleRepository roleRepository
+            @Qualifier("jpa")
+            IRoleRepository roleRepository
     ) {
         return args -> {
-            if (roleRepository.findByName("ROLE_SELLER").isEmpty()) {
+            if (roleRepository.findByName("ROLE_SUPER_ADMIN").isEmpty()) {
                 roleRepository.save(
                         Role.builder()
-                                .name("ROLE_SELLER")
+                                .name("ROLE_SUPER_ADMIN")
                                 .build()
                 );
             }

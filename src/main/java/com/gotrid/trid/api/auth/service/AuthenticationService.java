@@ -18,12 +18,13 @@ import com.gotrid.trid.core.auth.token.TokenRepository;
 import com.gotrid.trid.core.user.model.Gender;
 import com.gotrid.trid.core.user.model.Role;
 import com.gotrid.trid.core.user.model.Users;
-import com.gotrid.trid.core.user.repository.RoleRepository;
+import com.gotrid.trid.core.user.repository.IRoleRepository;
 import com.gotrid.trid.core.user.repository.UserRepository;
 import com.gotrid.trid.infrastructure.email.service.EmailService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -50,8 +51,8 @@ import static com.gotrid.trid.infrastructure.email.service.EmailTemplateName.RES
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Service
 public class AuthenticationService {
-
-    private final RoleRepository roleRepository;
+    @Qualifier("jpa")
+    private final IRoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;

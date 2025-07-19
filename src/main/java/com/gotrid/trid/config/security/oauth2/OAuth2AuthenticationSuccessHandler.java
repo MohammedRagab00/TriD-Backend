@@ -4,12 +4,13 @@ import com.gotrid.trid.config.security.jwt.JwtService;
 import com.gotrid.trid.core.user.model.Gender;
 import com.gotrid.trid.core.user.model.Role;
 import com.gotrid.trid.core.user.model.Users;
-import com.gotrid.trid.core.user.repository.RoleRepository;
+import com.gotrid.trid.core.user.repository.IRoleRepository;
 import com.gotrid.trid.core.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -27,7 +28,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    @Qualifier("jpa")
+    private final IRoleRepository roleRepository;
 
     @Override
     @Transactional
