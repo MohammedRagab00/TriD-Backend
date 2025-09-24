@@ -29,7 +29,7 @@ spring:
           model: ${AI_MODEL}
     vectorstore:
       pgvector:
-        initialize-schema: true
+        initialize-schema: false
   cache:
     type: redis
   data:
