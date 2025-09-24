@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy JAR app to Azure Web App - go-trid
+name: Build and deploy JAR app to Azure Web App - trid
 
 on:
   push:
@@ -21,10 +21,10 @@ jobs:
       - name: Set up Java version
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'microsoft'
 
-      - name: Build with Maven (Skip tests)
+      - name: Build with Maven
         run: mvn clean install -DskipTests=true
 
       - name: Upload artifact for deployment job
@@ -49,15 +49,16 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_46CBEEA111444145A4AD6B60D1204B6A }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0053DB85B9ED4D08BCF16D463C4858EB }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_175018A43B674106A0545DF102B550A7 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_1142AB35B6AE45318C2276A7ADDD19AC }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_40F217A8161F47B4956B96F5DD0CAB74 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2A274534EAC14299BA7EAE8B3255C361 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'go-trid'
+          app-name: 'trid'
           slot-name: 'Production'
           package: '*.jar'
+
           
