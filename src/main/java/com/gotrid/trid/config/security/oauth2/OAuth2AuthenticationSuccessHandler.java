@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -48,8 +49,16 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         Map<String, Object> attributes = oAuth2User.getAttributes();
         ExtractedData extractedData = extractAll(attributes);
         String email = extractedData.email().toLowerCase();
-        if (!userRepository.existsByEmail(email))
+        Optional<Users> byEmail = userRepository.findByEmail(email);
+        if (byEmail.isPresent()) {
+            Users user = byEmail.get();
+            if (!user.isEnabled()) {
+                user.setEnabled(true);
+                userRepository.save(user);
+            }
+        } else {
             saveUserToDatabase(extractedData);
+        }
         CustomOAuth2User customUser = new CustomOAuth2User(email);
 
         //* Generate JWT token
